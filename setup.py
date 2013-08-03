@@ -27,4 +27,8 @@ setuptools.setup(
     package_dir={
         '': 'src'
     },
+    tests_require=[
+        'requests',
+    ],
+    test_suite='test.runall',
 )
