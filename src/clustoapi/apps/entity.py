@@ -3,6 +3,12 @@
 # -*- mode:python; sh-basic-offset:4; indent-tabs-mode:nil; coding:utf-8 -*-
 # vim:set tabstop=4 softtabstop=4 expandtab shiftwidth=4 fileencoding=utf-8:
 #
+# Copyright 2010, Ron Gorodetzky <ron@parktree.net>
+# Copyright 2010, Jeremy Grosser <jeremy@synack.me>
+# Copyright 2013, Jorge Gallegos <kad@blegh.net>
+
+"""
+"""
 
 import bottle
 from bottle import request
@@ -10,7 +16,7 @@ import clusto
 from clustoapi import util
 
 
-app = bottle.Bottle()
+bottle_app = bottle.Bottle()
 
 
 def _object(name, driver=None):
@@ -37,8 +43,8 @@ def _object(name, driver=None):
     return obj
 
 
-@app.route('/')
-@app.route('/<driver>')
+@bottle_app.get('/')
+@bottle_app.get('/<driver>')
 def get_entities(driver=None):
     """
     Returns all entities, or (optionally) all entities of the given driver
@@ -71,7 +77,7 @@ def get_entities(driver=None):
     return util.dumps(result)
 
 
-@app.put('/<driver>')
+@bottle_app.put('/<driver>')
 def create(driver):
     """
     Creates a new object of the given driver.
@@ -118,7 +124,7 @@ def create(driver):
     return get_entities(driver)
 
 
-@app.delete('/<driver>')
+@bottle_app.delete('/<driver>')
 def delete(driver):
     """
     Deletes an object if it matches the given driver
@@ -165,7 +171,7 @@ def delete(driver):
     return get_entities(driver)
 
 
-@app.route('/<driver>/<name>')
+@bottle_app.get('/<driver>/<name>')
 def show(driver, name):
     """
     Returns a json representation of the given object
@@ -194,7 +200,7 @@ def show(driver, name):
     return util.dumps(result)
 
 
-@app.put('/<driver>/<name>')
+@bottle_app.put('/<driver>/<name>')
 def insert(driver, name):
     """
     Inserts the given device from the request parameters into the object
@@ -238,7 +244,7 @@ def insert(driver, name):
 
 
 
-@app.route('/<driver>/<name>/attr')
+@bottle_app.get('/<driver>/<name>/attr')
 def attrs(driver, name):
     """
     Query attributes from this object.
@@ -270,7 +276,7 @@ def attrs(driver, name):
     return util.dumps(result)
 
 
-@app.put('/<driver>/<name>/attr')
+@bottle_app.put('/<driver>/<name>/attr')
 def add_attr(driver, name):
     """
     Add an attribute to this object.
@@ -304,7 +310,7 @@ def add_attr(driver, name):
     return show(driver, name)
 
 
-@app.post('/<driver>/<name>/attr')
+@bottle_app.post('/<driver>/<name>/attr')
 def set_attr(driver, name):
     """
     Sets an attribute from this object. If the attribute doesn't exist
@@ -342,7 +348,7 @@ def set_attr(driver, name):
     return show(driver, name)
 
 
-@app.delete('/<driver>/<name>/attr')
+@bottle_app.delete('/<driver>/<name>/attr')
 def del_attrs(driver, name):
     """
     Deletes an attribute from this object
