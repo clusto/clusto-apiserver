@@ -14,6 +14,7 @@ setuptools.setup(
     author='Jorge Gallegos',
     author_email='kad@blegh.net',
     description='A clusto API server',
+    license='BSD',
     install_requires=[
         'clusto>0.6',
         'bottle',
