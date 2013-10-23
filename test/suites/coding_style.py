@@ -25,13 +25,15 @@ class PEP8Test(unittest.TestCase):
 
     def pep8(self, filename):
         "PEP8 partial check"
-        pep8style = pep8.StyleGuide(quiet=True, config_file=SETUP_CFG)
-        result = pep8style.check_files([filename])
-        message = ''
-        if result.total_errors != 0:
-            message = 'Found code style errors (and warnings): %s' % (result.messages)
+        pep8style = pep8.StyleGuide(config_file=SETUP_CFG)
+        report = pep8style.check_files([filename])
+        messages = []
+        if report.total_errors != 0:
+            report._deferred_print.sort()
+            for line_number, offset, code, text, doc in report._deferred_print:
+                messages.append('Row %d Col %d: %s' % (line_number, offset + 1, text,))
         self.assertEqual(
-            result.total_errors, 0, message)
+            report.total_errors, 0, ','.join(messages))
 
 
 def suite():
