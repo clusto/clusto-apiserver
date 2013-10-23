@@ -29,7 +29,8 @@ setuptools.setup(
         '': 'src'
     },
     tests_require=[
-        'requests',
+        'shelldoctest',
+        'pep8',
     ],
-    test_suite='test.runall',
+    test_suite='test.all.suites',
 )
