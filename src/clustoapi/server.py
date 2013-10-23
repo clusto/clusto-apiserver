@@ -33,12 +33,25 @@ import clusto
 from clusto import script_helper
 from clusto.services import config as service
 import os
+import string
 import sys
 import types
 
 
 MODULE_INDEX = {}
 root_app = bottle.Bottle()
+
+
+def get_url(path=False):
+    """
+Returns the server's normalized URL
+"""
+
+    (scheme, netloc, qpath, qs, fragment) = bottle.request.urlparts
+    if path:
+        return u'%s://%s%s' % (scheme, netloc, qpath)
+    else:
+        return u'%s://%s' % (scheme, netloc)
 
 
 @root_app.get('/favicon.ico')
@@ -61,6 +74,7 @@ text document.
 
 #   Get the request path so we can look at the module index
     path = '/'.join(bottle.request.path.split('/')[0:-1])
+    url = get_url()
     if not path:
         path = '/'
     mod = MODULE_INDEX[path]
@@ -73,34 +87,41 @@ text document.
 #   Build a "TOC" with all mounted apps
     if path == '/':
         mods = []
-        fullurl = bottle.request.urlparts.geturl()[0:-1]
         for mount, module in MODULE_INDEX.items():
             if mount != '/':
-                mods.append('\n * `%s <%s%s/__doc__>`_\n' % (
-                    module.__name__, fullurl, mount,))
+                mods.append('\n * `%s <${server_url}%s/__doc__>`_\n' % (
+                    module.__name__, mount,))
         if mods:
             docs.append('\nMounted Applications\n%s\n' % ('-' * 20, ))
             docs.extend(mods)
 
     docs.append('\nDocument strings for this module\n%s\n' % ('-' * 32,))
+    toc = []
+    methods = []
     for name in dir(mod):
         method = getattr(mod, name)
         if hasattr(method, '__call__') and \
                 isinstance(method, types.FunctionType):
-            docs.append(
+            toc.append('\n * `%s()`_' % (name,))
+            methods.append(
                 '\n%s()\n%s\n%s' % (
                     name, '~' * (len(name) + 2), method.__doc__)
             )
 
-    text = '\n'.join(docs)
+    docs.extend(toc)
+    docs.extend(methods)
+
+    tpl = string.Template('\n'.join(docs))
+    text = tpl.safe_substitute(server_url=url)
     try:
+        raise ImportError
         from docutils import core
         return core.publish_string(source=text, writer_name='html')
     except ImportError:
         bottle.response.content_type = 'text/plain'
         return text
 
-def main():
+def main(config={}):
     """
 Main entry point for the clusto-apiserver console program
 """
@@ -108,6 +129,8 @@ Main entry point for the clusto-apiserver console program
     cfg = script_helper.load_config(os.environ.get('CLUSTOCONFIG',
                                     '/etc/clusto/clusto.conf'))
     clusto.connect(cfg)
+    if config:
+        service.config = config
     bind_host = service.conf('apiserver.bind', default='127.0.0.1')
     bind_port = service.conf('apiserver.port', default='9664')
     wsgi_server = service.conf('apiserver.server', default='wsgiref')
