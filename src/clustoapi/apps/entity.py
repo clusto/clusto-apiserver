@@ -242,7 +242,6 @@ will fail
     return show(driver, name)
 
 
-
 @bottle_app.get('/<driver>/<name>/attr')
 def attrs(driver, name):
     """

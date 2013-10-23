@@ -121,6 +121,7 @@ text document.
         bottle.response.content_type = 'text/plain'
         return text
 
+
 def main(config={}):
     """
 Main entry point for the clusto-apiserver console program
