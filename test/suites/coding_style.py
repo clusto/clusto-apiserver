@@ -11,6 +11,7 @@ import sys
 import unittest
 
 SRC_DIR = os.path.relpath('%s/../../src' % (os.path.dirname(__file__),))
+SETUP_CFG = os.path.relpath('%s/../../setup.cfg' % (os.path.dirname(__file__),))
 
 
 class PEP8Test(unittest.TestCase):
@@ -24,8 +25,7 @@ class PEP8Test(unittest.TestCase):
 
     def pep8(self, filename):
         "PEP8 partial check"
-        pep8style = pep8.StyleGuide(quiet=True)
-        print os.path.realpath(self.filename)
+        pep8style = pep8.StyleGuide(quiet=True, config_file=SETUP_CFG)
         result = pep8style.check_files([filename])
         message = ''
         if result.total_errors != 0:
