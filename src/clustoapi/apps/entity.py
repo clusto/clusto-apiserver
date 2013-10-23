@@ -21,12 +21,13 @@ bottle_app = bottle.Bottle()
 
 def _object(name, driver=None):
     """
-    Tries to fetch a clusto object from a given name, optionally validating
-    the driver given. Returns:
-    * HTTP Error 404 if the object could not be found
-    * HTTP Error 409 if the object does not match the expected driver
-    * Clusto object otherwise
-    """
+Tries to fetch a clusto object from a given name, optionally validating
+the driver given. Returns:
+
+ *  HTTP Error 404 if the object could not be found
+ *  HTTP Error 409 if the object does not match the expected driver
+ *  Clusto object otherwise
+"""
 
     try:
         if driver:
@@ -47,20 +48,20 @@ def _object(name, driver=None):
 @bottle_app.get('/<driver>')
 def get_entities(driver=None):
     """
-    Returns all entities, or (optionally) all entities of the given driver
+Returns all entities, or (optionally) all entities of the given driver
 
-    Example::
+Example::
 
-        curl http://localhost:9664/e/
+    curl ${server_url}/e/
 
-    Will list all entities
+Will list all entities
 
-    Example::
+Example::
 
-        curl http://localhost:9664/e/pool
+    curl ${server_url}/e/pool
 
-    Will list all entities that match the driver ``pool``
-    """
+Will list all entities that match the driver ``pool``
+"""
 
     result = []
     kwargs = {}
@@ -80,26 +81,25 @@ def get_entities(driver=None):
 @bottle_app.put('/<driver>')
 def create(driver):
     """
-    Creates a new object of the given driver.
+Creates a new object of the given driver.
 
-    *   Requires HTTP parameters ``name``
+ *  Requires HTTP parameters ``name``
 
-    Example::
+Example::
 
-        curl -X PUT -d "name=pool1" http://localhost:9664/e/pool
+    curl -X PUT -d "name=pool1" ${server_url}/e/pool
 
-    Will create a new ``pool1`` object with a ``pool`` driver. If the
-    ``pool1`` object already exists, this will return an error.
+Will create a new ``pool1`` object with a ``pool`` driver. If the
+``pool1`` object already exists, this will return an error.
 
-    Example::
+Example::
 
-        curl -X PUT -d "name=pool1" -d "name=pool2" http://localhost:9664/e/pool
+    curl -X PUT -d "name=pool1" -d "name=pool2" ${server_url}/e/pool
 
-    Will create new objects ``pool1`` and ``pool2`` with a ``pool`` driver. As
-    all objects are validated prior to creation, if any of them already exists
-    the entire batch operation will fail.
-        
-    """
+Will create new objects ``pool1`` and ``pool2`` with a ``pool`` driver. As
+all objects are validated prior to creation, if any of them already exists
+the entire batch operation will fail.
+"""
 
     if driver not in clusto.driverlist:
         bottle.abort(404, 'Requested driver "%s" does not exist' % (driver,))
@@ -127,26 +127,25 @@ def create(driver):
 @bottle_app.delete('/<driver>')
 def delete(driver):
     """
-    Deletes an object if it matches the given driver
+Deletes an object if it matches the given driver
 
-    *   Requires HTTP parameters ``name``
+ *  Requires HTTP parameters ``name``
 
-    Example::
+Example::
 
-        curl -X DELETE -d "name=server1" http://localhost:9664/e/basicserver
+    curl -X DELETE -d "name=server1" ${server_url}/e/basicserver
 
-    Will create a new ``pool1`` object with a ``pool`` driver. If the
-    ``pool1`` object already exists, this will return an error.
+Will create a new ``pool1`` object with a ``pool`` driver. If the
+``pool1`` object already exists, this will return an error.
 
-    Example::
+Example::
 
-        curl -X PUT -d "name=pool1" -d "name=pool2" http://localhost:9664/e/pool
+    curl -X PUT -d "name=pool1" -d "name=pool2" ${server_url}/e/pool
 
-    Will create new objects ``pool1`` and ``pool2`` with a ``pool`` driver. As
-    all objects are validated prior to creation, if any of them already exists
-    the entire batch operation will fail.
-        
-    """
+Will create new objects ``pool1`` and ``pool2`` with a ``pool`` driver. As
+all objects are validated prior to creation, if any of them already exists
+the entire batch operation will fail.
+"""
 
     if driver not in clusto.driverlist:
         bottle.abort(404, 'Requested driver "%s" does not exist' % (driver,))
@@ -174,15 +173,15 @@ def delete(driver):
 @bottle_app.get('/<driver>/<name>')
 def show(driver, name):
     """
-    Returns a json representation of the given object
+Returns a json representation of the given object
 
-    Example::
+Example::
 
-        curl http://localhost:9664/e/pool/testpool
+    curl ${server_url}/e/pool/testpool
 
-    Will return a JSON representation of the ``testpool`` object **if** its
-    driver is ``pool``
-    """
+Will return a JSON representation of the ``testpool`` object **if** its
+driver is ``pool``
+"""
 
     result = {}
     obj = _object(name, driver)
@@ -203,24 +202,24 @@ def show(driver, name):
 @bottle_app.put('/<driver>/<name>')
 def insert(driver, name):
     """
-    Inserts the given device from the request parameters into the object
+Inserts the given device from the request parameters into the object
 
-    Example:
+Example::
 
-        curl -X PUT -d "device=server1" http://localhost:9664/e/pool/testpool
+    curl -X PUT -d "device=server1" ${server_url}/e/pool/testpool
 
-    Will insert the device ``server1`` into the pool ``testpool`` **if**
-    the driver for ``testpool`` is ``pool``.
+Will insert the device ``server1`` into the pool ``testpool`` **if**
+the driver for ``testpool`` is ``pool``.
 
-    Example::
+Example::
 
-        curl -X PUT -d "device=server1" -d "device=server2" http://localhost:9664/e/pool/testpool
+    curl -X PUT -d "device=server1" -d "device=server2" ${server_url}/e/pool/testpool
 
-    Will insert both objects ``server1`` and ``server2`` into the pool
-    ``testpool``. In this example, all objects are validated before being
-    inserted, if any of the objects doesn't exist, the entire batch operation
-    will fail
-    """
+Will insert both objects ``server1`` and ``server2`` into the pool
+``testpool``. In this example, all objects are validated before being
+inserted, if any of the objects doesn't exist, the entire batch operation
+will fail
+"""
 
     obj = _object(name, driver)
     devices = request.params.getall('device')
@@ -247,22 +246,22 @@ def insert(driver, name):
 @bottle_app.get('/<driver>/<name>/attr')
 def attrs(driver, name):
     """
-    Query attributes from this object.
+Query attributes from this object.
 
-    Example::
+Example::
 
-        curl http://localhost:9664/e/server/server1
+    curl ${server_url}/e/server/server1
 
-    Will show all the attributes from the object ``server1`` **if** the driver
-    for ``server1`` is ``server``
+Will show all the attributes from the object ``server1`` **if** the driver
+for ``server1`` is ``server``
 
-    Example::
-    
-        curl -d "key=owner" -d "value=joe" http://localhost:9664/e/server/server1
+Example::
 
-    Will show the attributes for ``server1`` if their key is ``owner`` *and*
-    the subkey is ``joe``
-    """
+    curl -d "key=owner" -d "value=joe" ${server_url}/e/server/server1
+
+Will show the attributes for ``server1`` if their key is ``owner`` *and*
+the subkey is ``joe``
+"""
 
     result = {
         'attrs': []
@@ -279,25 +278,25 @@ def attrs(driver, name):
 @bottle_app.put('/<driver>/<name>/attr')
 def add_attr(driver, name):
     """
-    Add an attribute to this object.
+Add an attribute to this object.
 
-    *   Requires HTTP parameters ``key`` and ``value``
-    *   Optional parameters are ``subkey`` and ``number``
+ *  Requires HTTP parameters ``key`` and ``value``
+ *  Optional parameters are ``subkey`` and ``number``
 
-    Example::
+Example::
 
-        curl -X PUT -d "key=group" -d "value=web" http://localhost:9664/e/server/server1
+    curl -X PUT -d "key=group" -d "value=web" ${server_url}/e/server/server1
 
-    Will add the attribute with key ``group`` with value ``web`` to the
-    object ``server1`` **if** the driver for ``server1`` is ``server``
+Will add the attribute with key ``group`` with value ``web`` to the
+object ``server1`` **if** the driver for ``server1`` is ``server``
 
-    Example::
-    
-        curl -X PUT -d "key=group" -d "subkey=owner" -d "value=joe" http://localhost:9664/e/server/server1
+Example::
 
-    Will add the attribute with key ``group`` *and* subkey ``owner`` *and*
-    value ``joe`` to the object ``server1``
-    """
+    curl -X PUT -d "key=group" -d "subkey=owner" -d "value=joe" ${server_url}/e/server/server1
+
+Will add the attribute with key ``group`` *and* subkey ``owner`` *and*
+value ``joe`` to the object ``server1``
+"""
 
     kwargs = dict(request.params.items())
     obj = _object(name, driver)
@@ -313,29 +312,29 @@ def add_attr(driver, name):
 @bottle_app.post('/<driver>/<name>/attr')
 def set_attr(driver, name):
     """
-    Sets an attribute from this object. If the attribute doesn't exist
-    it will be added, if the attribute already exists then it will be
-    updated.
+Sets an attribute from this object. If the attribute doesn't exist
+it will be added, if the attribute already exists then it will be
+updated.
 
-    *   Requires HTTP parameters ``key`` and ``value``
-    *   Optional parameters are ``subkey`` and ``number``
+ *  Requires HTTP parameters ``key`` and ``value``
+ *  Optional parameters are ``subkey`` and ``number``
 
-    Example::
+Example::
 
-        curl -X POST -d "key=group" -d "value=web" http://localhost:9664/e/server/server1
+    curl -X POST -d "key=group" -d "value=web" ${server_url}/e/server/server1
 
-    Will add the attribute with key ``group`` with value ``web`` to the
-    object ``server1`` **if** the driver for ``server1`` is ``server``. If the
-    attribute already exists, it will *update* it to the value ``web``
+Will add the attribute with key ``group`` with value ``web`` to the
+object ``server1`` **if** the driver for ``server1`` is ``server``. If the
+attribute already exists, it will *update* it to the value ``web``
 
-    Example::
+Example::
 
-        curl -X POST -d "key=group" -d "subkey=owner" -d "value=joe" http://localhost:9664/e/server/server1
+    curl -X POST -d "key=group" -d "subkey=owner" -d "value=joe" ${server_url}/e/server/server1
 
-    Will add the attribute with key ``group`` *and* subkey ``owner`` with
-    value ``web`` to the object ``server1``. If the attribute already exists,
-    it will *update* it to the value ``joe``
-    """
+Will add the attribute with key ``group`` *and* subkey ``owner`` with
+value ``web`` to the object ``server1``. If the attribute already exists,
+it will *update* it to the value ``joe``
+"""
 
     kwargs = dict(request.params.items())
     obj = _object(name, driver)
@@ -351,32 +350,32 @@ def set_attr(driver, name):
 @bottle_app.delete('/<driver>/<name>/attr')
 def del_attrs(driver, name):
     """
-    Deletes an attribute from this object
+Deletes an attribute from this object
 
-    *   Requires HTTP parameters ``key`` and ``value``
-    *   Optional parameters are ``subkey`` and ``number``
+ *  Requires HTTP parameters ``key`` and ``value``
+ *  Optional parameters are ``subkey`` and ``number``
 
-    Example::
+Example::
 
-        curl -X DELETE -d "key=group" -d "value=web" http://localhost:9664/e/server/server1
+    curl -X DELETE -d "key=group" -d "value=web" ${server_url}/e/server/server1
 
-    Will detele the attribute with key ``group`` *and* value ``web`` from the
-    object ``server1`` **if** the driver for ``server1`` is ``server``.
+Will detele the attribute with key ``group`` *and* value ``web`` from the
+object ``server1`` **if** the driver for ``server1`` is ``server``.
 
-    Example::
+Example::
 
-        curl -X POST -d "key=group" -d "subkey=owner" -d "value=joe" http://localhost:9664/e/server/server1
+    curl -X POST -d "key=group" -d "subkey=owner" -d "value=joe" ${server_url}/e/server/server1
 
-    Will delete the attribute with key ``group`` *and* subkey ``owner`` *and*
-    value ``web`` from the object ``server1``.
+Will delete the attribute with key ``group`` *and* subkey ``owner`` *and*
+value ``web`` from the object ``server1``.
 
-    Example::
+Example::
 
-        curl -X POST -d "key=group" http://localhost:9664/e/server/server1
+    curl -X POST -d "key=group" ${server_url}/e/server/server1
 
-    Will delete *all the attributes* with key ``group`` from the object
-    ``server1``, regardless of subkeys or values.
-    """
+Will delete *all the attributes* with key ``group`` from the object
+``server1``, regardless of subkeys or values.
+"""
 
     kwargs = dict(request.params.items())
     obj = _object(name, driver)
