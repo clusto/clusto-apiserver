@@ -249,7 +249,7 @@ Query attributes from this object.
 
 Example::
 
-    curl ${server_url}/e/server/server1
+    $ curl ${server_url}/e/server/server1
 
 Will show all the attributes from the object ``server1`` **if** the driver
 for ``server1`` is ``server``

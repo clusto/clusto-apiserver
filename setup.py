@@ -16,6 +16,7 @@ setuptools.setup(
     description='A clusto API server',
     license='BSD',
     install_requires=[
+        'distribute',
         'clusto>0.6',
         'bottle',
     ],

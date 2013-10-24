@@ -3,21 +3,22 @@
 # -*- mode:python; sh-basic-offset:4; indent-tabs-mode:nil; coding:utf-8 -*-
 # vim:set tabstop=4 softtabstop=4 expandtab shiftwidth=4 fileencoding=utf-8:
 #
+from __future__ import absolute_import
 
-from suites import coding_style
 import sys
+import suites.coding_style as cs_suite
 import unittest
 
 
 def suites():
     allsuites = []
-    for suite in (coding_style,):
-        allsuites.append(suite.suite())
+    for s in (cs_suite,):
+        allsuites.append(s.testcases())
     alltests = unittest.TestSuite(allsuites)
     return alltests
 
 def main():
-    runner = unittest.TextTestRunner()
+    runner = unittest.TextTestRunner(verbosity=2)
     runner.run(suites())
 
 

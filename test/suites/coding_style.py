@@ -3,6 +3,7 @@
 # -*- mode:python; sh-basic-offset:4; indent-tabs-mode:nil; coding:utf-8 -*-
 # vim:set tabstop=4 softtabstop=4 expandtab shiftwidth=4 fileencoding=utf-8:
 #
+from __future__ import absolute_import
 
 import functools
 import os
@@ -36,7 +37,7 @@ class PEP8Test(unittest.TestCase):
             report.total_errors, 0, ','.join(messages))
 
 
-def suite():
+def testcases():
     filenames = {}
     for root, dirs, files in os.walk(os.path.join(SRC_DIR, 'clustoapi')):
         for f in files:
@@ -52,8 +53,8 @@ def suite():
 
 
 def main():
-    alltests = unittest.TestSuite([suite()])
-    runner = unittest.TextTestRunner()
+    alltests = unittest.TestSuite([testcases()])
+    runner = unittest.TextTestRunner(verbosity=2)
     runner.run(alltests)
 
 
