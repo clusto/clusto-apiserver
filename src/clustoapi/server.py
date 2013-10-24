@@ -31,7 +31,6 @@ The Clusto API Server should thus have the following required features:
 import bottle
 import clusto
 from clusto import script_helper
-from clusto.services import config as service
 import os
 import string
 import sys
@@ -130,16 +129,43 @@ Main entry point for the clusto-apiserver console program
     cfg = script_helper.load_config(os.environ.get('CLUSTOCONFIG',
                                     '/etc/clusto/clusto.conf'))
     clusto.connect(cfg)
-    if config:
-        service.config = config
-    bind_host = service.conf('apiserver.bind', default='127.0.0.1')
-    bind_port = service.conf('apiserver.port', default='9664')
-    wsgi_server = service.conf('apiserver.server', default='wsgiref')
-    mount_apps = service.conf('apiserver.apps')
-    debug = service.conf('apiserver.debug', default=False)
+    bind_host = config.get(
+        'bind',
+        script_helper.get_conf(
+            cfg, 'apiserver.bind', default='0.0.0.0'
+        ),
+    )
+    bind_port = config.get(
+        'port',
+        script_helper.get_conf(
+            cfg, 'apiserver.port', default='9664'
+        ),
+    )
+    wsgi_server = config.get(
+        'server',
+        script_helper.get_conf(
+            cfg, 'apiserver.server', default='wsgiref'
+        ),
+    )
+    debug = config.get(
+        'debug',
+        script_helper.get_conf(
+            cfg, 'apiserver.debug', default=False
+        )
+    )
+    mount_apps = {}
+    if 'apps' in config:
+        mount_apps = config['apps']
+    else:
+        apps = script_helper.get_conf(cfg, 'apiserver.apps', default='').split(',')
+        for app in apps:
+            if app:
+                aclass, mount = app.split(':')
+                mount_apps[mount] = aclass
 
 #   Dynamically load all mount points from services.conf
     for mount_point, cls in mount_apps.items():
+        sys.stderr.write('Mounting %s in %s\n' % (cls, mount_point,))
         module = __import__(cls, fromlist=[cls])
         root_app.mount(mount_point, module.bottle_app)
         root_app.route('%s/__doc__' % (mount_point,), 'GET', build_docs)
