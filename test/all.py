@@ -16,6 +16,7 @@ def test_suites():
     alltests = unittest.TestSuite(allsuites)
     return alltests
 
+
 def main():
     runner = unittest.TextTestRunner(verbosity=2)
     runner.run(test_suites())
