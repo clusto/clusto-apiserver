@@ -43,7 +43,7 @@ def testcases():
             if f.endswith('.py') and os.path.getsize(filename) > 0:
                 filekey = os.path.join(os.path.basename(root), f)
                 filekey = filekey.replace('/', '_').replace('.', '_')
-                filenames['test_%s' % (filekey,)] = filename
+                filenames['test_pep8_%s' % (filekey,)] = filename
     pep8_suite = unittest.TestSuite()
     for k, v in filenames.items():
         pep8_suite.addTest(PEP8Test(k, v))
