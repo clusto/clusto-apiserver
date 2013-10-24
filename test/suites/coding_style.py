@@ -3,7 +3,6 @@
 # -*- mode:python; sh-basic-offset:4; indent-tabs-mode:nil; coding:utf-8 -*-
 # vim:set tabstop=4 softtabstop=4 expandtab shiftwidth=4 fileencoding=utf-8:
 #
-from __future__ import absolute_import
 
 import functools
 import os
@@ -11,8 +10,7 @@ import pep8
 import sys
 import unittest
 
-SRC_DIR = os.path.relpath('%s/../../src' % (os.path.dirname(__file__),))
-SETUP_CFG = os.path.relpath('%s/../../setup.cfg' % (os.path.dirname(__file__),))
+TOP_DIR = os.path.realpath('%s/../../' % (os.path.dirname(os.path.realpath(__file__)),))
 
 
 class PEP8Test(unittest.TestCase):
@@ -26,7 +24,7 @@ class PEP8Test(unittest.TestCase):
 
     def pep8(self, filename):
         "PEP8 partial check"
-        pep8style = pep8.StyleGuide(config_file=SETUP_CFG)
+        pep8style = pep8.StyleGuide(config_file=os.path.join(TOP_DIR, 'setup.cfg'))
         report = pep8style.check_files([filename])
         messages = []
         if report.total_errors != 0:
@@ -39,7 +37,7 @@ class PEP8Test(unittest.TestCase):
 
 def testcases():
     filenames = {}
-    for root, dirs, files in os.walk(os.path.join(SRC_DIR, 'clustoapi')):
+    for root, dirs, files in os.walk(TOP_DIR):
         for f in files:
             filename = os.path.join(root, f)
             if f.endswith('.py') and os.path.getsize(filename) > 0:

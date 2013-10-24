@@ -5,6 +5,32 @@
 #
 
 import setuptools
+import sys
+
+
+install_requires = [
+    'distribute',
+    'clusto>0.6',
+    'bottle',
+]
+
+test_requires = [
+    'shelldoctest',
+    'pep8',
+]
+
+develop_requires = test_requires
+
+args = sys.argv[1:]
+# if we are installing just punt all extra reqs and do install_requires only
+if 'install' not in args:
+    for arg in args:
+        if arg == 'develop':
+            install_requires.extend(develop_requires)
+            continue
+        if arg == 'test':
+            install_requires.extend(test_requires)
+            continue
 
 
 setuptools.setup(
@@ -15,11 +41,10 @@ setuptools.setup(
     author_email='kad@blegh.net',
     description='A clusto API server',
     license='BSD',
-    install_requires=[
+    setup_requires=[
         'distribute',
-        'clusto>0.6',
-        'bottle',
     ],
+    install_requires=install_requires,
     entry_points={
         'console_scripts': [
             'clusto-apiserver=clustoapi.server:main'
@@ -29,9 +54,5 @@ setuptools.setup(
     package_dir={
         '': 'src'
     },
-    tests_require=[
-        'shelldoctest',
-        'pep8',
-    ],
-    test_suite='test.all.suites',
+    test_suite='test.all.test_suites',
 )
