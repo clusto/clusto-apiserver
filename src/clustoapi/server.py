@@ -113,7 +113,6 @@ text document.
     tpl = string.Template('\n'.join(docs))
     text = tpl.safe_substitute(server_url=url)
     try:
-        raise ImportError
         from docutils import core
         return core.publish_string(source=text, writer_name='html')
     except ImportError:
@@ -121,33 +120,34 @@ text document.
         return text
 
 
-def main(config={}):
+def configure(config={}):
     """
-Main entry point for the clusto-apiserver console program
+Configure the root app
 """
 
     cfg = script_helper.load_config(os.environ.get('CLUSTOCONFIG',
                                     '/etc/clusto/clusto.conf'))
     clusto.connect(cfg)
-    bind_host = config.get(
+    kwargs = {}
+    kwargs['host'] = config.get(
         'bind',
         script_helper.get_conf(
             cfg, 'apiserver.bind', default='0.0.0.0'
         ),
     )
-    bind_port = config.get(
+    kwargs['port'] = config.get(
         'port',
         script_helper.get_conf(
             cfg, 'apiserver.port', default='9664'
         ),
     )
-    wsgi_server = config.get(
+    kwargs['server'] = config.get(
         'server',
         script_helper.get_conf(
             cfg, 'apiserver.server', default='wsgiref'
         ),
     )
-    debug = config.get(
+    kwargs['debug'] = config.get(
         'debug',
         script_helper.get_conf(
             cfg, 'apiserver.debug', default=False
@@ -160,10 +160,9 @@ Main entry point for the clusto-apiserver console program
         apps = script_helper.get_conf(cfg, 'apiserver.apps', default='').split(',')
         for app in apps:
             if app:
-                aclass, mount = app.split(':')
+                mount, aclass = app.split(':')
                 mount_apps[mount] = aclass
 
-#   Dynamically load all mount points from services.conf
     for mount_point, cls in mount_apps.items():
         sys.stderr.write('Mounting %s in %s\n' % (cls, mount_point,))
         module = __import__(cls, fromlist=[cls])
@@ -173,8 +172,15 @@ Main entry point for the clusto-apiserver console program
 
     MODULE_INDEX['/'] = sys.modules[__name__]
 
-    bottle.run(root_app, host=bind_host, port=bind_port,
-               server=wsgi_server, debug=debug, reloader=debug, interval=1)
+    return kwargs
+
+
+def main():
+    """
+Main entry point for the clusto-apiserver console program
+"""
+    kwargs = configure()
+    root_app.run(**kwargs)
 
 
 if __name__ == '__main__':
