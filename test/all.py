@@ -12,7 +12,7 @@ import unittest
 def test_suites():
     allsuites = []
     for s in (coding_style,):
-        allsuites.append(s.testcases())
+        allsuites.append(s.test_cases())
     alltests = unittest.TestSuite(allsuites)
     return alltests
 

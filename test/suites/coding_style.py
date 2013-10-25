@@ -35,7 +35,7 @@ class PEP8Test(unittest.TestCase):
             report.total_errors, 0, ','.join(messages))
 
 
-def testcases():
+def test_cases():
     filenames = {}
     for root, dirs, files in os.walk(TOP_DIR):
         for f in files:
@@ -47,13 +47,13 @@ def testcases():
     pep8_suite = unittest.TestSuite()
     for k, v in filenames.items():
         pep8_suite.addTest(PEP8Test(k, v))
-    return pep8_suite
+    alltests = unittest.TestSuite([pep8_suite])
+    return alltests
 
 
 def main():
-    alltests = unittest.TestSuite([testcases()])
     runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(alltests)
+    runner.run(test_cases())
 
 
 if __name__ == '__main__':
