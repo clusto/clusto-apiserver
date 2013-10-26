@@ -17,6 +17,7 @@ install_requires = [
 test_requires = [
     'shelldoctest',
     'pep8',
+    'port-for',
 ]
 
 develop_requires = test_requires
