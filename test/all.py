@@ -6,12 +6,13 @@
 
 import sys
 from suites import coding_style
+from suites import shell_docs
 import unittest
 
 
 def test_suites():
     allsuites = []
-    for s in (coding_style,):
+    for s in (coding_style, shell_docs):
         allsuites.append(s.test_cases())
     alltests = unittest.TestSuite(allsuites)
     return alltests
