@@ -9,7 +9,7 @@ import json
 
 
 def dumps(obj, **kwargs):
-    result = json.dumps(obj, indent=2, sort_keys=True, **kwargs)
+    result = json.dumps(obj, indent=4, sort_keys=True, **kwargs)
     return result
 
 
