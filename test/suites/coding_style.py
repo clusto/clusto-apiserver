@@ -35,15 +35,22 @@ class PEP8Test(unittest.TestCase):
             report.total_errors, 0, ','.join(messages))
 
 
+def setUpModule():
+    print 'in setup'
+
+def tearDownModule():
+    print 'in tear'
+
 def test_cases():
     filenames = {}
-    for root, dirs, files in os.walk(TOP_DIR):
-        for f in files:
-            filename = os.path.join(root, f)
-            if f.endswith('.py') and os.path.getsize(filename) > 0:
-                filekey = os.path.join(os.path.basename(root), f)
-                filekey = filekey.replace('/', '_').replace('.', '_')
-                filenames['test_pep8_%s' % (filekey,)] = filename
+    for walkable in ('src', 'test'):
+        for root, dirs, files in os.walk(os.path.join(TOP_DIR, walkable)):
+            for f in files:
+                filename = os.path.join(root, f)
+                if f.endswith('.py') and os.path.getsize(filename) > 0:
+                    filekey = os.path.join(os.path.basename(root), f)
+                    filekey = filekey.replace('/', '_').replace('.', '_')
+                    filenames['test_pep8_%s' % (filekey,)] = filename
     pep8_suite = unittest.TestSuite()
     for k, v in filenames.items():
         pep8_suite.addTest(PEP8Test(k, v))
