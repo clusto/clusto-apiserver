@@ -4,8 +4,7 @@
 # vim:set tabstop=4 softtabstop=4 expandtab shiftwidth=4 fileencoding=utf-8:
 #
 
-from clustoapi import server
-from clustoapi import apps
+import clustoapi
 import doctest
 import port_for
 import socket
@@ -15,6 +14,41 @@ import string
 import threading
 import time
 import unittest
+
+
+PORT = port_for.select_random()
+MODULES = {}
+mounts = {}
+for app in clustoapi.apps.__all__:
+    mod = 'clustoapi.apps.%s' % (app,)
+    module = __import__(mod, fromlist=[mod])
+    MODULES[app] = module
+    mounts['/%s' % (app,)] = mod
+
+bottle_kwargs = clustoapi.server.configure(
+    {
+        'quiet': True,
+        'port': PORT,
+        'debug': False,
+        'apps': mounts
+    }
+)
+
+bottle = clustoapi.server.root_app
+THREAD = threading.Thread(target=bottle.run, kwargs=bottle_kwargs)
+THREAD.daemon = True
+THREAD.start()
+print 'Waiting for test server to come up...'
+for i in range(100):
+    time.sleep(0.1)
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(('127.0.0.1', PORT))
+        s.close()
+        break
+    except socket.error:
+        continue
+print 'Is up.'
 
 
 class TemplatedShellDocTestParser(shelldoctest.ShellDocTestParser):
@@ -29,78 +63,37 @@ class TemplatedShellDocTestParser(shelldoctest.ShellDocTestParser):
         return output
 
 
-class TestingWebServer(threading.Thread):
-
-    def __init__(self, port):
-        threading.Thread.__init__(self)
-        self.bottle_kwargs = server.configure({'quiet': True, 'port': port, })
-        self.bottle = server.root_app
-        self.name = 'Bottle-%d' % (port,)
-        self.port = port
-        self.daemon = True
-
-    def ping(self):
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect(('127.0.0.1', self.port))
-            s.close()
-            return True
-        except socket.error:
-            return False
-
-    def run(self):
-        self.bottle.run(**self.bottle_kwargs)
-
-    def shutdown(self):
-        self.bottle.close()
-
 class ShellDocTestSuite(unittest.TestSuite):
+
+    globs = {
+        'system_command': shelldoctest.system_command,
+        'optionflags': doctest.ELLIPSIS,
+    }
 
     def __init__(self, module):
         unittest.TestSuite.__init__(self)
-        self.port = port_for.select_random()
         finder = doctest.DocTestFinder(
             parser=TemplatedShellDocTestParser(
-                substitutions={'server_url': 'http://127.0.0.1:%s' % (self.port,)},
+                substitutions={'server_url': 'http://127.0.0.1:%s' % (PORT,)},
             ),
-            exclude_empty=False
+            exclude_empty=True,
         )
-        suite = doctest.DocTestSuite(
-            module, test_finder=finder,
-            globs={'system_command': shelldoctest.system_command},
-            setUp=self.setUp,
-            tearDown=self.tearDown,
-        )
-        for test in suite._tests:
-            self.addTest(test)
-
-    def setUp(self, *args):
-        if not hasattr(self, 'thread'):
-            self.thread = TestingWebServer(self.port)
-        if not self.thread.is_alive():
-            self.thread.start()
-            for i in range(100):
-                time.sleep(0.1)
-                if self.thread.ping():
-                    break
-
-    def tearDown(self, *args):
-        self.thread.shutdown()
-        self.thread.join(3)
-
+        tests = finder.find(module, globs=self.globs)
+        tests.sort()
+        for test in tests:
+            tc = doctest.DocTestCase(test)
+            self.addTest(tc)
 
 
 def test_cases():
-    doctest_suite = ShellDocTestSuite(server)
-    for app in apps.__all__:
-        mod = 'clustoapi.apps.%s' % (app,)
-        module = __import__(mod, fromlist=[mod])
+    doctest_suite = ShellDocTestSuite(clustoapi.server)
+    for name, module in MODULES.items():
         doctest_suite.addTests(ShellDocTestSuite(module))
     return doctest_suite
 
 
 def main():
-    runner = unittest.TextTestRunner(verbosity=2)
+    runner = unittest.TextTestRunner()
     runner.run(test_cases())
 
 
