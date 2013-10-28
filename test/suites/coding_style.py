@@ -20,7 +20,6 @@ class PEP8Test(unittest.TestCase):
         f.__doc__ = 'PEP8 for %s' % (filename,)
         self.__setattr__(methodname, f)
         unittest.TestCase.__init__(self, methodname)
-        self.filename = filename
 
     def pep8(self, filename):
         "PEP8 partial check"
