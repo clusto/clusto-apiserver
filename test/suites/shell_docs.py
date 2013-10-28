@@ -94,10 +94,9 @@ class ShellDocComplete(unittest.TestCase):
 
     def shelldoc(self, function):
         "ShellDoc completeness partial check"
+        # we don't care about strings here, just that there is at least 1 example
         finder = doctest.DocTestFinder(
-            parser=TemplatedShellDocTestParser(
-                substitutions={'server_url': 'http://127.0.0.1:%s' % (PORT,)},
-            ),
+            parser=shelldoctest.ShellDocTestParser(),
             exclude_empty=False,
         )
         shelldocs = finder.find(function)
