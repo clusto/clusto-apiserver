@@ -6,6 +6,7 @@
 
 import clustoapi
 import doctest
+import os
 import port_for
 import socket
 import sys
@@ -16,13 +17,11 @@ import time
 import unittest
 
 
+TOP_DIR = os.path.realpath('%s/../../' % (os.path.dirname(os.path.realpath(__file__)),))
 PORT = port_for.select_random()
-MODULES = {}
 mounts = {}
 for app in clustoapi.apps.__all__:
     mod = 'clustoapi.apps.%s' % (app,)
-    module = __import__(mod, fromlist=[mod])
-    MODULES[app] = module
     mounts['/%s' % (app,)] = mod
 
 bottle_kwargs = clustoapi.server.configure(
@@ -38,7 +37,6 @@ bottle = clustoapi.server.root_app
 THREAD = threading.Thread(target=bottle.run, kwargs=bottle_kwargs)
 THREAD.daemon = True
 THREAD.start()
-print 'Waiting for test server to come up...'
 for i in range(100):
     time.sleep(0.1)
     try:
@@ -48,7 +46,6 @@ for i in range(100):
         break
     except socket.error:
         continue
-print 'Is up.'
 
 
 class TemplatedShellDocTestParser(shelldoctest.ShellDocTestParser):
@@ -63,37 +60,35 @@ class TemplatedShellDocTestParser(shelldoctest.ShellDocTestParser):
         return output
 
 
-class ShellDocTestSuite(unittest.TestSuite):
-
-    globs = {
-        'system_command': shelldoctest.system_command,
-        'optionflags': doctest.ELLIPSIS,
-    }
-
-    def __init__(self, module):
-        unittest.TestSuite.__init__(self)
-        finder = doctest.DocTestFinder(
+def test_cases():
+    filenames = [os.path.join(TOP_DIR, 'src', 'clustoapi', 'server.py')]
+    for walkable in ('apps',):
+        for root, dirs, files in os.walk(
+            os.path.join(TOP_DIR, 'src', 'clustoapi', walkable)
+        ):
+            for f in files:
+                filename = os.path.join(root, f)
+                if f.endswith('.py') and os.path.getsize(filename) > 0:
+                    filenames.append(filename)
+    shell_docsuite = unittest.TestSuite()
+    for filename in filenames:
+        suite = doctest.DocFileSuite(
+            filename,
+            module_relative=False,
             parser=TemplatedShellDocTestParser(
                 substitutions={'server_url': 'http://127.0.0.1:%s' % (PORT,)},
             ),
-            exclude_empty=True,
+            globs={
+                'system_command': shelldoctest.system_command,
+            },
+            optionflags=doctest.ELLIPSIS,
         )
-        tests = finder.find(module, globs=self.globs)
-        tests.sort()
-        for test in tests:
-            tc = doctest.DocTestCase(test)
-            self.addTest(tc)
-
-
-def test_cases():
-    doctest_suite = ShellDocTestSuite(clustoapi.server)
-    for name, module in MODULES.items():
-        doctest_suite.addTests(ShellDocTestSuite(module))
-    return doctest_suite
+        shell_docsuite.addTest(suite)
+    return suite
 
 
 def main():
-    runner = unittest.TextTestRunner()
+    runner = unittest.TextTestRunner(verbosity=2)
     runner.run(test_cases())
 
 
