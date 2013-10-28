@@ -35,15 +35,9 @@ class PEP8Test(unittest.TestCase):
             report.total_errors, 0, ','.join(messages))
 
 
-def setUpModule():
-    print 'in setup'
-
-def tearDownModule():
-    print 'in tear'
-
 def test_cases():
     filenames = {}
-    for walkable in ('src', 'test'):
+    for walkable in ('src', 'test',):
         for root, dirs, files in os.walk(os.path.join(TOP_DIR, walkable)):
             for f in files:
                 filename = os.path.join(root, f)
