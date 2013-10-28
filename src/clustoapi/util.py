@@ -8,8 +8,11 @@ import clusto
 import json
 
 
-def dumps(obj, **kwargs):
-    result = json.dumps(obj, indent=4, sort_keys=True, **kwargs)
+def dumps(obj):
+    result = json.dumps(
+        obj, indent=4, sort_keys=True,
+        separators=(',', ': ')
+    )
     return result
 
 
