@@ -26,6 +26,16 @@ The Clusto API Server should thus have the following required features:
     displaying attributes
  *  Resource manipulation: allocate and deallocate objects from resources
  *  Querying
+
+::
+
+    $ echo TEST
+    TEST
+
+    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/entity/pool # doctest: +ELLIPSIS
+    ...
+    HTTP: 200
+
 """
 
 import bottle
@@ -151,6 +161,12 @@ Configure the root app
         'debug',
         script_helper.get_conf(
             cfg, 'apiserver.debug', default=False
+        )
+    )
+    kwargs['quiet'] = config.get(
+        'quiet',
+        script_helper.get_conf(
+            cfg, 'apiserver.quiet', default=False
         )
     )
     mount_apps = {}
