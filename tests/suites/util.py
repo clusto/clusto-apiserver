@@ -35,7 +35,7 @@ def start_testing_web_server(port):
 Start a testing web server in a non-blocking thread.
     """
 
-    bottle_kwargs = clustoapi.server.configure(
+    bottle_kwargs = clustoapi.server._configure(
         {
             'quiet': True,
             'port': port,
