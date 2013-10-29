@@ -53,13 +53,13 @@ Start a testing web server in a non-blocking thread.
 
     conffile = config_for_testing()
     bottle_kwargs = clustoapi.server._configure(
-        config = {
+        config={
             'quiet': True,
             'port': port,
             'debug': False,
             'apps': get_mount_apps(),
         },
-        configfile = conffile
+        configfile=conffile
     )
 
     bottle = clustoapi.server.root_app
