@@ -4,10 +4,9 @@
 # vim:set tabstop=4 softtabstop=4 expandtab shiftwidth=4 fileencoding=utf-8:
 #
 
+import clustoapi
 import doctest
 import functools
-import inspect
-import os
 import port_for
 import sys
 import string
@@ -78,33 +77,23 @@ def test_cases():
 
     # Test for at least one example in all public methods on each mounted app
     doctest_complete = unittest.TestSuite()
-    for mount_point, cls in util.get_mount_apps().items():
-        module = __import__(cls, fromlist=[cls])
-        for fname in dir(module):
-            function = getattr(module, fname)
-            if not fname.startswith('_') and inspect.isfunction(function):
-                doctest_complete.addTest(DocTestComplete(cls, function))
-            else:
-                pass
+    modules = ['clustoapi.server']
+    modules.extend(util.get_mount_apps().values())
+    for fname, function in util.get_public_methods(modules):
+        doctest_complete.addTest(DocTestComplete(fname, function))
 
     doctest_docsuite.addTest(doctest_complete)
 
     # Now, for those that *do* have shell examples, test that they are actually correct
-    filenames = [os.path.join(util.SRC_DIR, 'clustoapi', 'server.py')]
-    for walkable in ('apps',):
-        for root, dirs, files in os.walk(
-            os.path.join(util.SRC_DIR, 'clustoapi', walkable)
-        ):
-            for f in files:
-                filename = os.path.join(root, f)
-                if f.endswith('.py') and os.path.getsize(filename) > 0:
-                    filenames.append(filename)
-    for filename in filenames:
+    for filename in util.get_source_filenames():
         suite = doctest.DocFileSuite(
             filename,
             module_relative=False,
             parser=TemplatedDocTestParser(
-                substitutions={'server_url': 'http://127.0.0.1:%s' % (PORT,)},
+                substitutions={
+                    'server_url': 'http://127.0.0.1:%s' % (PORT,),
+                    'server_version': clustoapi.__version__,
+                },
             ),
             optionflags=doctest.ELLIPSIS,
         )

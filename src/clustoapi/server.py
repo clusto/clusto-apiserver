@@ -41,6 +41,7 @@ The Clusto API Server should thus have the following required features:
 import bottle
 import clusto
 from clusto import script_helper
+import clustoapi
 import os
 import string
 import sys
@@ -70,6 +71,19 @@ Send an HTTP code to clients so they stop asking for favicon
 """
 
     bottle.abort(410)
+
+
+@root_app.get('/__version__')
+def show_version():
+    """
+This shows the current version running, example::
+
+    $ curl -s ${server_url}/__version__
+    "${server_version}"
+
+    """
+
+    return u'%s' % (clustoapi.util.dumps(clustoapi.__version__),)
 
 
 @root_app.get('/')
@@ -121,7 +135,7 @@ text document.
     docs.extend(methods)
 
     tpl = string.Template('\n'.join(docs))
-    text = tpl.safe_substitute(server_url=url)
+    text = tpl.safe_substitute(server_url=url, server_version=clustoapi.__version__,)
     try:
         from docutils import core
         return core.publish_string(source=text, writer_name='html')
