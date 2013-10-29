@@ -19,8 +19,6 @@ import time
 import unittest
 
 
-TOP_DIR = os.path.realpath('%s/../../' % (os.path.dirname(os.path.realpath(__file__)),))
-
 # Select a random port to spin up this testing server
 PORT = port_for.select_random()
 MOUNT_APPS = {}
@@ -123,11 +121,13 @@ def test_cases():
 
     shell_docsuite.addTest(shelldoc_complete)
 
+    top_dir = os.path.realpath('%s/../../' % (os.path.dirname(os.path.realpath(__file__)),))
+
     # Now, for those that *do* have shell examples, test that they are actually correct
-    filenames = [os.path.join(TOP_DIR, 'src', 'clustoapi', 'server.py')]
+    filenames = [os.path.join(top_dir, 'src', 'clustoapi', 'server.py')]
     for walkable in ('apps',):
         for root, dirs, files in os.walk(
-            os.path.join(TOP_DIR, 'src', 'clustoapi', walkable)
+            os.path.join(top_dir, 'src', 'clustoapi', walkable)
         ):
             for f in files:
                 filename = os.path.join(root, f)
