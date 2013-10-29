@@ -9,8 +9,7 @@ import os
 import pep8
 import sys
 import unittest
-
-TOP_DIR = os.path.realpath('%s/../../' % (os.path.dirname(os.path.realpath(__file__)),))
+import util
 
 
 class PEP8Test(unittest.TestCase):
@@ -23,7 +22,7 @@ class PEP8Test(unittest.TestCase):
 
     def pep8(self, filename):
         "PEP8 partial check"
-        pep8style = pep8.StyleGuide(config_file=os.path.join(TOP_DIR, 'setup.cfg'))
+        pep8style = pep8.StyleGuide(config_file=os.path.join(util.TOP_DIR, 'setup.cfg'))
         report = pep8style.check_files([filename])
         messages = []
         if report.total_errors != 0:
@@ -31,13 +30,13 @@ class PEP8Test(unittest.TestCase):
             for line_number, offset, code, text, doc in report._deferred_print:
                 messages.append('Row %d Col %d: %s' % (line_number, offset + 1, text,))
         self.assertEqual(
-            report.total_errors, 0, ','.join(messages))
+            report.total_errors, 0, '; '.join(messages))
 
 
 def test_cases():
     filenames = {}
-    for walkable in ('src', 'test',):
-        for root, dirs, files in os.walk(os.path.join(TOP_DIR, walkable)):
+    for walkable in (util.SRC_DIR, util.TEST_DIR,):
+        for root, dirs, files in os.walk(walkable):
             for f in files:
                 filename = os.path.join(root, f)
                 if f.endswith('.py') and os.path.getsize(filename) > 0:

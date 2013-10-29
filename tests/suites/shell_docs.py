@@ -4,54 +4,26 @@
 # vim:set tabstop=4 softtabstop=4 expandtab shiftwidth=4 fileencoding=utf-8:
 #
 
-import clustoapi
 import doctest
 import functools
 import inspect
 import os
 import port_for
-import socket
 import sys
 import shelldoctest
 import string
-import threading
-import time
 import unittest
+import util
 
 
 # Select a random port to spin up this testing server
 PORT = port_for.select_random()
-MOUNT_APPS = {}
-for app in clustoapi.apps.__all__:
-    mod = 'clustoapi.apps.%s' % (app,)
-    MOUNT_APPS['/%s' % (app,)] = mod
 
-bottle_kwargs = clustoapi.server.configure(
-    {
-        'quiet': True,
-        'port': PORT,
-        'debug': False,
-        'apps': MOUNT_APPS,
-    }
-)
 
-bottle = clustoapi.server.root_app
+def setUpModule():
 
-# Start this server in a thread so it doesn't block
-THREAD = threading.Thread(target=bottle.run, kwargs=bottle_kwargs)
-THREAD.daemon = True
-THREAD.start()
-
-# Wait until the server is responding requests
-for i in range(100):
-    time.sleep(0.1)
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(('127.0.0.1', PORT))
-        s.close()
-        break
-    except socket.error:
-        continue
+    util.start_testing_web_server(PORT)
+    util.ping(PORT)
 
 
 class TemplatedShellDocTestParser(shelldoctest.ShellDocTestParser):
@@ -110,7 +82,7 @@ def test_cases():
 
     # Test for at least one example in all public methods on each mounted app
     shelldoc_complete = unittest.TestSuite()
-    for mount_point, cls in MOUNT_APPS.items():
+    for mount_point, cls in util.get_mount_apps().items():
         module = __import__(cls, fromlist=[cls])
         for fname in dir(module):
             function = getattr(module, fname)
@@ -121,13 +93,11 @@ def test_cases():
 
     shell_docsuite.addTest(shelldoc_complete)
 
-    top_dir = os.path.realpath('%s/../../' % (os.path.dirname(os.path.realpath(__file__)),))
-
     # Now, for those that *do* have shell examples, test that they are actually correct
-    filenames = [os.path.join(top_dir, 'src', 'clustoapi', 'server.py')]
+    filenames = [os.path.join(util.SRC_DIR, 'clustoapi', 'server.py')]
     for walkable in ('apps',):
         for root, dirs, files in os.walk(
-            os.path.join(top_dir, 'src', 'clustoapi', walkable)
+            os.path.join(util.SRC_DIR, 'clustoapi', walkable)
         ):
             for f in files:
                 filename = os.path.join(root, f)

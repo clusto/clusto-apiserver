@@ -11,7 +11,7 @@ import unittest
 
 def test_suites():
     allsuites = []
-    for s in (suites.python_docs, suites.coding_style, suites.shell_docs):
+    for s in (suites.coding_style, suites.python_docs, suites.shell_docs):
         allsuites.append(s.test_cases())
     alltests = unittest.TestSuite(allsuites)
     return alltests
