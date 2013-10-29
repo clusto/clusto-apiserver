@@ -17,6 +17,22 @@ TEST_DIR = os.path.realpath('%s/../' % (os.path.dirname(os.path.realpath(__file_
 SRC_DIR = os.path.join(TOP_DIR, 'src')
 
 
+def config_for_testing():
+    """
+Write a clusto config file for testing purposes, also unlink any sqlite
+databases around in preparation to run a new test suite.
+    """
+
+    conf_file = os.path.join(TEST_DIR, 'clustotest.conf')
+    sqlite_file = os.path.join(TEST_DIR, 'clustotest.db')
+    if os.path.isfile(sqlite_file):
+        os.unlink(sqlite_file)
+    f = open(conf_file, 'wb')
+    f.writelines(['[clusto]\n', 'dsn = sqlite:///%s' % (sqlite_file,)])
+    f.close()
+    return conf_file
+
+
 def get_mount_apps():
     """
 Return all apps as mountable apps for the main server.
@@ -35,13 +51,15 @@ def start_testing_web_server(port):
 Start a testing web server in a non-blocking thread.
     """
 
+    conffile = config_for_testing()
     bottle_kwargs = clustoapi.server._configure(
-        {
+        config = {
             'quiet': True,
             'port': port,
             'debug': False,
             'apps': get_mount_apps(),
-        }
+        },
+        configfile = conffile
     )
 
     bottle = clustoapi.server.root_app

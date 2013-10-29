@@ -155,14 +155,22 @@ each mounted application, the main __doc__ endpoint, or on the main endpoint::
         return text
 
 
-def _configure(config={}):
+def _configure(config={}, configfile=None):
     """
 Configure the root app
 """
 
-    cfg = script_helper.load_config(os.environ.get('CLUSTOCONFIG',
-                                    '/etc/clusto/clusto.conf'))
+    if configfile:
+        cfg = configfile
+    else:
+        cfg = os.environ.get(
+            'CLUSTOCONFIG',
+            '/etc/clusto/clusto.conf'
+        )
+    cfg = script_helper.load_config(cfg)
     clusto.connect(cfg)
+    # This is an idempotent operation
+    clusto.init_clusto()
     kwargs = {}
     kwargs['host'] = config.get(
         'bind',

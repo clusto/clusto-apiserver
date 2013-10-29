@@ -5,3 +5,5 @@ dist
 .*.swp
 *~
 *.egg
+tests/clustotest.conf
+tests/clustotest.db
