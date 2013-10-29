@@ -52,13 +52,24 @@ Returns all entities, or (optionally) all entities of the given driver
 
 Example::
 
-    curl ${server_url}/e/
+    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/entity/
+    [
+        "/clustometa/clustometa",
+        "/pool/pool1",
+        "/pool/pool2"
+    ]
+    HTTP: 200
 
 Will list all entities
 
 Example::
 
-    curl ${server_url}/e/pool
+    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/entity/pool
+    [
+        "/pool/pool1",
+        "/pool/pool2"
+    ]
+    HTTP: 200
 
 Will list all entities that match the driver ``pool``
 """
@@ -78,7 +89,7 @@ Will list all entities that match the driver ``pool``
     return util.dumps(result)
 
 
-@bottle_app.put('/<driver>')
+@bottle_app.post('/<driver>')
 def create(driver):
     """
 Creates a new object of the given driver.
@@ -94,7 +105,12 @@ Will create a new ``pool1`` object with a ``pool`` driver. If the
 
 Example::
 
-    curl -X PUT -d "name=pool1" -d "name=pool2" ${server_url}/e/pool
+    $ curl -X POST -d 'name=pool1' -d 'name=pool2' -s -w '\\n%{http_code}' ${server_url}/e/pool
+    [
+        "/pool/pool1",
+        "/pool/pool2"
+    ]
+    200
 
 Will create new objects ``pool1`` and ``pool2`` with a ``pool`` driver. As
 all objects are validated prior to creation, if any of them already exists
@@ -249,7 +265,9 @@ Query attributes from this object.
 
 Example::
 
-    $ curl ${server_url}/e/server/server1
+    $ curl -s -w '\\n%{http_code}' ${server_url}/e/server/server1
+    []
+    200
 
 Will show all the attributes from the object ``server1`` **if** the driver
 for ``server1`` is ``server``

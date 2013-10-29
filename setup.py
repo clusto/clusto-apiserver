@@ -55,5 +55,5 @@ setuptools.setup(
     package_dir={
         '': 'src'
     },
-    test_suite='test.all.test_suites',
+    test_suite='tests.all.test_suites',
 )
