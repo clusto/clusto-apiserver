@@ -8,7 +8,6 @@ import functools
 import os
 import pep8
 import sys
-from .. import util
 import unittest
 
 TOP_DIR = os.path.realpath('%s/../../' % (os.path.dirname(os.path.realpath(__file__)),))
