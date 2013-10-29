@@ -27,15 +27,6 @@ The Clusto API Server should thus have the following required features:
  *  Resource manipulation: allocate and deallocate objects from resources
  *  Querying
 
-::
-
-    $ echo TEST
-    TEST
-
-    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/entity/pool # doctest: +ELLIPSIS
-    ...
-    HTTP: 200
-
 """
 
 import bottle
@@ -52,7 +43,7 @@ MODULE_INDEX = {}
 root_app = bottle.Bottle()
 
 
-def get_url(path=False):
+def _get_url(path=False):
     """
 Returns the server's normalized URL
 """
@@ -67,7 +58,11 @@ Returns the server's normalized URL
 @root_app.get('/favicon.ico')
 def never_again():
     """
-Send an HTTP code to clients so they stop asking for favicon
+Send an HTTP code to clients so they stop asking for favicon. Example::
+
+    $ curl -s -o /dev/null -w '\\nHTTP: %{http_code}' ${server_url}/favicon.ico
+    HTTP: 410
+
 """
 
     bottle.abort(410)
@@ -78,8 +73,9 @@ def show_version():
     """
 This shows the current version running, example::
 
-    $ curl -s ${server_url}/__version__
+    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/__version__
     "${server_version}"
+    HTTP: 200
 
     """
 
@@ -92,12 +88,27 @@ def build_docs():
     """
 This will build documentation for the given module and all its methods.
 If python-rest is available, it will attempt to parse it as a restructured
-text document.
+text document. You can get to the docs by going to the __doc__ endpoint on
+each mounted application, the main __doc__ endpoint, or on the main endpoint::
+
+    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/__doc__
+    <?xml version="1.0" encoding="utf-8" ?>
+    ...
+    HTTP: 200
+
+    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/
+    <?xml version="1.0" encoding="utf-8" ?>
+    ...
+    HTTP: 200
+
+    $ diff -q <( curl -s ${server_url}/__doc__ ) <( curl -s ${server_url}/ ) && echo equal || echo diff
+    equal
+
 """
 
 #   Get the request path so we can look at the module index
     path = '/'.join(bottle.request.path.split('/')[0:-1])
-    url = get_url()
+    url = _get_url()
     if not path:
         path = '/'
     mod = MODULE_INDEX[path]
@@ -144,7 +155,7 @@ text document.
         return text
 
 
-def configure(config={}):
+def _configure(config={}):
     """
 Configure the root app
 """
@@ -209,7 +220,7 @@ def main():
     """
 Main entry point for the clusto-apiserver console program
 """
-    kwargs = configure()
+    kwargs = _configure()
     root_app.run(**kwargs)
 
 
