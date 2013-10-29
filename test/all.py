@@ -3,16 +3,16 @@
 # -*- mode:python; sh-basic-offset:4; indent-tabs-mode:nil; coding:utf-8 -*-
 # vim:set tabstop=4 softtabstop=4 expandtab shiftwidth=4 fileencoding=utf-8:
 #
+from __future__ import absolute_import
 
 import sys
-from suites import coding_style
-from suites import shell_docs
+import suites
 import unittest
 
 
 def test_suites():
     allsuites = []
-    for s in (coding_style, shell_docs):
+    for s in (suites.python_docs, suites.coding_style, suites.shell_docs):
         allsuites.append(s.test_cases())
     alltests = unittest.TestSuite(allsuites)
     return alltests
