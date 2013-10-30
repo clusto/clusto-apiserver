@@ -8,7 +8,39 @@ import clusto
 import json
 
 
+def object(name, driver=None):
+    """
+Tries to fetch a clusto object from a given name, optionally validating
+the driver given. Returns:
+
+ *  HTTP Error 404 if the object could not be found
+ *  HTTP Error 409 if the object does not match the expected driver
+ *  Clusto object otherwise
+"""
+
+    status = None
+    obj = None
+    msg = None
+    try:
+        if driver:
+            obj = clusto.get_by_name(name, assert_driver=clusto.driverlist[driver])
+        else:
+            obj = clusto.get_by_name(name)
+
+    except LookupError:
+        status = 404
+        msg = 'Object "%s" not found' % (name,)
+
+    except TypeError:
+        status = 409
+        msg = 'The driver for object "%s" is not "%s"' % (name, driver,)
+
+    return obj, status, msg
+
+
 def dumps(obj):
+    """
+"""
     result = json.dumps(
         obj, indent=4, sort_keys=True,
         separators=(',', ': ')
@@ -34,3 +66,18 @@ def unclusto(obj):
     if issubclass(obj.__class__, clusto.Driver):
         return '/%s/%s' % (obj.driver, obj.name)
     return str(obj)
+
+
+def show(obj):
+    result = {}
+    result['name'] = obj.name
+    result['driver'] = obj.driver
+
+    attrs = []
+    for x in obj.attrs():
+        attrs.append(unclusto(x))
+    result['attrs'] = attrs
+    result['contents'] = [unclusto(x) for x in obj.contents()]
+    result['parents'] = [unclusto(x) for x in obj.parents()]
+
+    return result
