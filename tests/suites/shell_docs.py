@@ -106,7 +106,7 @@ def test_cases():
             globs={
                 'system_command': shelldoctest.system_command,
             },
-            optionflags=doctest.ELLIPSIS,
+            optionflags=doctest.ELLIPSIS + doctest.REPORT_NDIFF + doctest.NORMALIZE_WHITESPACE,
         )
         shell_docsuite.addTest(suite)
     return shell_docsuite
