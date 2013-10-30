@@ -33,10 +33,10 @@ import bottle
 import clusto
 from clusto import script_helper
 import clustoapi
+import inspect
 import os
 import string
 import sys
-import types
 
 
 MODULE_INDEX = {}
@@ -56,18 +56,19 @@ Returns the server's normalized URL
 
 
 @root_app.get('/favicon.ico')
-def never_again():
+def favicon():
     """
 Send an HTTP code to clients so they stop asking for favicon. Example::
 
-    $ curl -s -o /dev/null -w '\\nHTTP: %{http_code}' ${server_url}/favicon.ico
+    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/favicon.ico
     HTTP: 410
 
 """
 
-    bottle.abort(410)
+    return bottle.HTTPResponse('', status=410)
 
 
+@root_app.route('/', method='HEAD')
 @root_app.get('/__version__')
 def show_version():
     """
@@ -76,6 +77,13 @@ This shows the current version running, example::
     $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/__version__
     "${server_version}"
     HTTP: 200
+
+If you make a HEAD request to the / endpoint, the response is also the version
+string, as that's less heavy to build than the regular / page
+
+    $ curl -s -I ${server_url}/
+    HTTP/1.0 200 OK
+    ...
 
     """
 
@@ -134,8 +142,7 @@ each mounted application, the main __doc__ endpoint, or on the main endpoint::
     methods = []
     for name in dir(mod):
         method = getattr(mod, name)
-        if hasattr(method, '__call__') and \
-                isinstance(method, types.FunctionType):
+        if name != 'main' and not name.startswith('_') and inspect.isfunction(method):
             toc.append('\n * `%s()`_' % (name,))
             methods.append(
                 '\n%s()\n%s\n%s' % (
