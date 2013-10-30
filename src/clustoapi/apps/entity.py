@@ -7,9 +7,6 @@
 # Copyright 2010, Jeremy Grosser <jeremy@synack.me>
 # Copyright 2013, Jorge Gallegos <kad@blegh.net>
 
-"""
-"""
-
 import bottle
 from bottle import request
 import clusto
@@ -17,31 +14,6 @@ from clustoapi import util
 
 
 bottle_app = bottle.Bottle()
-
-
-def _object(name, driver=None):
-    """
-Tries to fetch a clusto object from a given name, optionally validating
-the driver given. Returns:
-
- *  HTTP Error 404 if the object could not be found
- *  HTTP Error 409 if the object does not match the expected driver
- *  Clusto object otherwise
-"""
-
-    try:
-        if driver:
-            obj = clusto.get_by_name(name, assert_driver=clusto.driverlist[driver])
-        else:
-            obj = clusto.get_by_name(name)
-
-    except LookupError:
-        bottle.abort(404, 'Object "%s" not found' % (name,))
-
-    except TypeError:
-        bottle.abort(409, 'The driver for object "%s" is not "%s"' % (name, driver,))
-
-    return obj
 
 
 @bottle_app.get('/')
@@ -54,9 +26,7 @@ Example::
 
     $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/entity/
     [
-        "/clustometa/clustometa",
-        "/pool/pool1",
-        "/pool/pool2"
+        ...
     ]
     HTTP: 200
 
@@ -64,14 +34,20 @@ Will list all entities
 
 Example::
 
-    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/entity/pool
+    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/entity/clustometa
     [
-        "/pool/pool1",
-        "/pool/pool2"
+        "/clustometa/clustometa"
     ]
     HTTP: 200
 
-Will list all entities that match the driver ``pool``
+Will list all entities that match the driver ``clustometa``
+
+The following example should fail because there is no driver ``nondriver``::
+
+    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/entity/nondriver
+    "The requested driver \"nondriver\" does not exist"
+    HTTP: 409
+
 """
 
     result = []
@@ -82,7 +58,21 @@ Will list all entities that match the driver ``pool``
         if driver in clusto.driverlist:
             kwargs['clusto_drivers'] = [clusto.driverlist[driver]]
         else:
-            bottle.abort(404, 'The requested driver "%s" does not exist' % (driver,))
+            return bottle.HTTPResponse(
+                util.dumps('The requested driver "%s" does not exist' % (driver,)),
+                409
+            )
+    ents = clusto.get_entities(**kwargs)
+    for ent in ents:
+        result.append(util.unclusto(ent))
+
+    result = []
+    kwargs = {}
+    for param in request.params.keys():
+        kwargs[param] = request.params.getall(param)
+    if driver:
+        if driver in clusto.driverlist:
+            kwargs['clusto_drivers'] = [clusto.driverlist[driver]]
     ents = clusto.get_entities(**kwargs)
     for ent in ents:
         result.append(util.unclusto(ent))
@@ -98,46 +88,77 @@ Creates a new object of the given driver.
 
 Example::
 
-    curl -X PUT -d "name=pool1" ${server_url}/e/pool
+    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=createpool1' ${server_url}/entity/pool
+    [
+        "/pool/createpool1"
+    ]
+    HTTP: 201
 
 Will create a new ``pool1`` object with a ``pool`` driver. If the
-``pool1`` object already exists, this will return an error.
+``pool1`` object already exists, the status code returned will be 202,
+and you will see whatever warnings in the ``Warnings`` header::
 
-Example::
-
-    $ curl -X POST -d 'name=pool1' -d 'name=pool2' -s -w '\\n%{http_code}' ${server_url}/e/pool
+    $ curl -si -X POST -d 'name=createpool1' ${server_url}/entity/pool
+    HTTP/1.0 202 Accepted
+    ...
+    Warnings: Entity(s) /pool/createpool1 already exist(s)...
     [
-        "/pool/pool1",
-        "/pool/pool2"
+        "/pool/createpool1"
     ]
-    200
 
-Will create new objects ``pool1`` and ``pool2`` with a ``pool`` driver. As
-all objects are validated prior to creation, if any of them already exists
-the entire batch operation will fail.
+If you try to create a server of an unknown driver, you should receive
+a 409 status code back::
+
+    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=createobject' ${server_url}/entity/nondriver
+    "Requested driver \"nondriver\" does not exist"
+    HTTP: 409
+
+The following example::
+
+    $ curl -si -X POST -d 'name=createpool1' -d 'name=createpool2' ${server_url}/entity/pool
+    HTTP/1.0 202 Accepted
+    ...
+    Warnings: Entity(s) /pool/createpool1 already exist(s)...
+    [
+        "/pool/createpool1",
+        "/pool/createpool2"
+    ]
+
+Will attempt to create new objects ``createpool1`` and ``createpool2`` with
+a ``pool`` driver. As all objects are validated prior to creation, if any of
+them already exists the return code will be 202 (Accepted) and you will get
+an extra header ``Warnings`` with the message.
+
 """
 
     if driver not in clusto.driverlist:
-        bottle.abort(404, 'Requested driver "%s" does not exist' % (driver,))
+        return bottle.HTTPResponse(
+            util.dumps('Requested driver "%s" does not exist' % (driver,)),
+            409,
+        )
     cls = clusto.driverlist[driver]
     names = request.params.getall('name')
-#   clean so it is not forwarded to get_entities() further down
     request.params.pop('name')
 
     found = []
     for name in names:
         try:
-            found.append(clusto.get_by_name(name).name)
+            found.append(util.unclusto(clusto.get_by_name(name)))
         except LookupError:
             pass
 
-    if found:
-        bottle.abort(409, 'Object(s) %s already exists' % (','.join(found),))
-
+    result = []
     for name in names:
-        clusto.get_or_create(name, cls)
+        result.append(util.unclusto(clusto.get_or_create(name, cls)))
 
-    return get_entities(driver)
+    headers = {}
+    if found:
+        headers['Warnings'] = 'Entity(s) %s already exist(s)' % (','.join(found),)
+
+    code = 201
+    if found:
+        code = 202
+    return bottle.HTTPResponse(util.dumps(result), code, **headers)
 
 
 @bottle_app.delete('/<driver>')
@@ -147,27 +168,37 @@ Deletes an object if it matches the given driver
 
  *  Requires HTTP parameters ``name``
 
-Example::
+Examples::
 
-    curl -X DELETE -d "name=server1" ${server_url}/e/basicserver
+    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=servercreated' ${server_url}/entity/basicserver
+    [
+        "/basicserver/servercreated"
+    ]
+    HTTP: 201
 
-Will create a new ``pool1`` object with a ``pool`` driver. If the
-``pool1`` object already exists, this will return an error.
+    $ curl -s -w '\\nHTTP: %{http_code}' -X DELETE -d 'name=servercreated' ${server_url}/entity/nondriver
+    "Requested driver \"nondriver\" does not exist"
+    HTTP: 409
 
-Example::
+    $ curl -s -w '\\nHTTP: %{http_code}' -X DELETE -d 'name=servercreated' ${server_url}/entity/basicserver
+    HTTP: 204
 
-    curl -X PUT -d "name=pool1" -d "name=pool2" ${server_url}/e/pool
+    $ curl -s -w '\\nHTTP: %{http_code}' -X DELETE -d 'name=servercreated' ${server_url}/entity/basicserver
+    HTTP: 404
 
-Will create new objects ``pool1`` and ``pool2`` with a ``pool`` driver. As
-all objects are validated prior to creation, if any of them already exists
-the entire batch operation will fail.
+Will create a new ``servercreated`` object with a ``basicserver`` driver. Then
+it will proceed to delete it. If the operation succeeded, it will return a 200,
+if the object doesn't exist, it will return a 404.
+
 """
 
     if driver not in clusto.driverlist:
-        bottle.abort(404, 'Requested driver "%s" does not exist' % (driver,))
+        return bottle.HTTPResponse(
+            util.dumps('Requested driver "%s" does not exist' % (driver,)),
+            409,
+        )
+
     names = request.params.getall('name')
-#   clean so it is not forwarded to get_entities() further down
-    request.params.pop('name')
 
     notfound = []
     objs = []
@@ -177,13 +208,14 @@ the entire batch operation will fail.
         except LookupError:
             notfound.append(name)
 
+    code = 204
     if notfound:
-        bottle.abort(404, 'Object(s) %s does not exist' % (','.join(notfound),))
+        code = 404
+    else:
+        for obj in objs:
+            obj.entity.delete()
 
-    for obj in objs:
-        obj.entity.delete()
-
-    return get_entities(driver)
+    return bottle.HTTPResponse('', code)
 
 
 @bottle_app.get('/<driver>/<name>')
@@ -193,26 +225,31 @@ Returns a json representation of the given object
 
 Example::
 
-    curl ${server_url}/e/pool/testpool
+    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=showpool' ${server_url}/entity/pool
+    [
+        "/pool/showpool"
+    ]
+    HTTP: 201
 
-Will return a JSON representation of the ``testpool`` object **if** its
-driver is ``pool``
+    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/entity/pool/showpool
+    {
+        "attrs": [],
+        "contents": [],
+        "driver": "pool",
+        "name": "showpool",
+        "parents": []
+    }
+    HTTP: 200
+
+Will return a JSON representation of the previously created ``showpool``.
+
 """
 
-    result = {}
-    obj = _object(name, driver)
+    obj, status, msg = util.object(name, driver)
+    if not obj:
+        return bottle.HTTPResponse(util.dumps(msg), status)
 
-    result['name'] = name
-    result['driver'] = driver
-
-    attrs = []
-    for x in obj.attrs():
-        attrs.append(util.unclusto(x))
-    result['attrs'] = attrs
-    result['contents'] = [util.unclusto(x) for x in obj.contents()]
-    result['parents'] = [util.unclusto(x) for x in obj.parents()]
-
-    return util.dumps(result)
+    return util.dumps(util.show(obj))
 
 
 @bottle_app.put('/<driver>/<name>')
@@ -222,22 +259,75 @@ Inserts the given device from the request parameters into the object
 
 Example::
 
-    curl -X PUT -d "device=server1" ${server_url}/e/pool/testpool
+    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=insertpool' ${server_url}/entity/pool
+    [
+        "/pool/insertpool"
+    ]
+    HTTP: 201
 
-Will insert the device ``server1`` into the pool ``testpool`` **if**
-the driver for ``testpool`` is ``pool``.
+    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=insertserver' ${server_url}/entity/basicserver
+    [
+        "/basicserver/insertserver"
+    ]
+    HTTP: 201
 
-Example::
+    $ curl -s -w '\\nHTTP: %{http_code}' -X PUT -d 'device=insertserver' ${server_url}/entity/pool/insertpool
+    {
+        "attrs": [],
+        "contents": [
+            "/basicserver/insertserver"
+        ],
+        "driver": "pool",
+        "name": "insertpool",
+        "parents": []
+    }
+    HTTP: 200
 
-    curl -X PUT -d "device=server1" -d "device=server2" ${server_url}/e/pool/testpool
+Will:
 
-Will insert both objects ``server1`` and ``server2`` into the pool
-``testpool``. In this example, all objects are validated before being
-inserted, if any of the objects doesn't exist, the entire batch operation
-will fail
+#.  Create a pool entity called ``insertpool``
+#.  Create a basicserver entity called ``insertserver``
+#.  Insert the entity ``insertserver`` into the entity ``insertpool``
+
+Examples::
+
+    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=insertpool2' ${server_url}/entity/pool
+    [
+        "/pool/insertpool2"
+    ]
+    HTTP: 201
+
+    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=insertserver2' -d 'name=insertserver3' ${server_url}/entity/basicserver
+    [
+        "/basicserver/insertserver2",
+        "/basicserver/insertserver3"
+    ]
+    HTTP: 201
+
+    $ curl -s -w '\\nHTTP: %{http_code}' -X PUT -d 'device=insertserver2' -d 'device=insertserver3' ${server_url}/entity/pool/insertpool2
+    {
+        "attrs": [],
+        "contents": [
+            "/basicserver/insertserver2",
+            "/basicserver/insertserver3"
+        ],
+        "driver": "pool",
+        "name": "insertpool2",
+        "parents": []
+    }
+    HTTP: 200
+
+The above will:
+
+#.  Create a pool entity called ``insertpool2``
+#.  Create twp basicserver entities called ``insertserver2`` and ``insertserver3``
+#.  Insert both basicserver entities into the pool entity
+
 """
 
-    obj = _object(name, driver)
+    obj, status, msg = util.object(name, driver)
+    if not obj:
+        return bottle.HTTPResponse(util.dumps(msg), status)
     devices = request.params.getall('device')
 
     devobjs = []
@@ -255,150 +345,4 @@ will fail
         if devobj not in obj:
             obj.insert(devobj)
 
-    return show(driver, name)
-
-
-@bottle_app.get('/<driver>/<name>/attr')
-def attrs(driver, name):
-    """
-Query attributes from this object.
-
-Example::
-
-    $ curl -s -w '\\n%{http_code}' ${server_url}/e/server/server1
-    []
-    200
-
-Will show all the attributes from the object ``server1`` **if** the driver
-for ``server1`` is ``server``
-
-Example::
-
-    curl -d "key=owner" -d "value=joe" ${server_url}/e/server/server1
-
-Will show the attributes for ``server1`` if their key is ``owner`` *and*
-the subkey is ``joe``
-"""
-
-    result = {
-        'attrs': []
-    }
-
-    kwargs = dict(request.params.items())
-    obj = _object(name, driver)
-
-    for attr in obj.attrs(**kwargs):
-        result['attrs'].append(util.unclusto(attr))
-    return util.dumps(result)
-
-
-@bottle_app.put('/<driver>/<name>/attr')
-def add_attr(driver, name):
-    """
-Add an attribute to this object.
-
- *  Requires HTTP parameters ``key`` and ``value``
- *  Optional parameters are ``subkey`` and ``number``
-
-Example::
-
-    curl -X PUT -d "key=group" -d "value=web" ${server_url}/e/server/server1
-
-Will add the attribute with key ``group`` with value ``web`` to the
-object ``server1`` **if** the driver for ``server1`` is ``server``
-
-Example::
-
-    curl -X PUT -d "key=group" -d "subkey=owner" -d "value=joe" ${server_url}/e/server/server1
-
-Will add the attribute with key ``group`` *and* subkey ``owner`` *and*
-value ``joe`` to the object ``server1``
-"""
-
-    kwargs = dict(request.params.items())
-    obj = _object(name, driver)
-    for k in ('key', 'value'):
-        if k not in kwargs.keys():
-            bottle.abort(412, 'Provide at least "key" and "value"')
-    if 'number' in kwargs:
-        kwargs['number'] = int(kwargs['number'])
-    obj.add_attr(**kwargs)
-    return show(driver, name)
-
-
-@bottle_app.post('/<driver>/<name>/attr')
-def set_attr(driver, name):
-    """
-Sets an attribute from this object. If the attribute doesn't exist
-it will be added, if the attribute already exists then it will be
-updated.
-
- *  Requires HTTP parameters ``key`` and ``value``
- *  Optional parameters are ``subkey`` and ``number``
-
-Example::
-
-    curl -X POST -d "key=group" -d "value=web" ${server_url}/e/server/server1
-
-Will add the attribute with key ``group`` with value ``web`` to the
-object ``server1`` **if** the driver for ``server1`` is ``server``. If the
-attribute already exists, it will *update* it to the value ``web``
-
-Example::
-
-    curl -X POST -d "key=group" -d "subkey=owner" -d "value=joe" ${server_url}/e/server/server1
-
-Will add the attribute with key ``group`` *and* subkey ``owner`` with
-value ``web`` to the object ``server1``. If the attribute already exists,
-it will *update* it to the value ``joe``
-"""
-
-    kwargs = dict(request.params.items())
-    obj = _object(name, driver)
-    for k in ('key', 'value'):
-        if k not in kwargs.keys():
-            bottle.abort(412, 'Provide at least "key" and "value"')
-    if 'number' in kwargs:
-        kwargs['number'] = int(kwargs['number'])
-    obj.set_attr(**kwargs)
-    return show(driver, name)
-
-
-@bottle_app.delete('/<driver>/<name>/attr')
-def del_attrs(driver, name):
-    """
-Deletes an attribute from this object
-
- *  Requires HTTP parameters ``key`` and ``value``
- *  Optional parameters are ``subkey`` and ``number``
-
-Example::
-
-    curl -X DELETE -d "key=group" -d "value=web" ${server_url}/e/server/server1
-
-Will detele the attribute with key ``group`` *and* value ``web`` from the
-object ``server1`` **if** the driver for ``server1`` is ``server``.
-
-Example::
-
-    curl -X POST -d "key=group" -d "subkey=owner" -d "value=joe" ${server_url}/e/server/server1
-
-Will delete the attribute with key ``group`` *and* subkey ``owner`` *and*
-value ``web`` from the object ``server1``.
-
-Example::
-
-    curl -X POST -d "key=group" ${server_url}/e/server/server1
-
-Will delete *all the attributes* with key ``group`` from the object
-``server1``, regardless of subkeys or values.
-"""
-
-    kwargs = dict(request.params.items())
-    obj = _object(name, driver)
-    if 'key' not in kwargs.keys():
-        bottle.abort(412, 'Provide at least "key" and "value"')
-    if 'number' in kwargs:
-        kwargs['number'] = int(kwargs['number'])
-    obj.del_attrs(**kwargs)
     return show(driver, name)
