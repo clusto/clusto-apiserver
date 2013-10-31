@@ -33,13 +33,13 @@ import bottle
 import clusto
 from clusto import script_helper
 import clustoapi
+import functools
 import inspect
 import os
 import string
 import sys
 
 
-MODULE_INDEX = {}
 root_app = bottle.Bottle()
 
 
@@ -92,7 +92,7 @@ string, as that's less heavy to build than the regular / page
 
 @root_app.get('/')
 @root_app.get('/__doc__')
-def build_docs():
+def build_docs(path='/', module=__name__):
     """
 This will build documentation for the given module and all its methods.
 If python-rest is available, it will attempt to parse it as a restructured
@@ -114,28 +114,14 @@ each mounted application, the main __doc__ endpoint, or on the main endpoint::
 
 """
 
+
 #   Get the request path so we can look at the module index
-    path = '/'.join(bottle.request.path.split('/')[0:-1])
-    url = _get_url()
-    if not path:
-        path = '/'
-    mod = MODULE_INDEX[path]
+    mod = sys.modules[module]
     docs = ['\n%s\n%s\n%s\n%s' % (
         '=' * len(mod.__name__),
         mod.__name__,
         '=' * len(mod.__name__),
         mod.__doc__)]
-
-#   Build a "TOC" with all mounted apps
-    if path == '/':
-        mods = []
-        for mount, module in MODULE_INDEX.items():
-            if mount != '/':
-                mods.append('\n * `%s <${server_url}%s/__doc__>`_\n' % (
-                    module.__name__, mount,))
-        if mods:
-            docs.append('\nMounted Applications\n%s\n' % ('-' * 20, ))
-            docs.extend(mods)
 
     docs.append('\nDocument strings for this module\n%s\n' % ('-' * 32,))
     toc = []
@@ -153,7 +139,7 @@ each mounted application, the main __doc__ endpoint, or on the main endpoint::
     docs.extend(methods)
 
     tpl = string.Template('\n'.join(docs))
-    text = tpl.safe_substitute(server_url=url, server_version=clustoapi.__version__,)
+    text = tpl.safe_substitute(server_url=_get_url(), server_version=clustoapi.__version__,)
     try:
         from docutils import core
         return core.publish_string(source=text, writer_name='html')
@@ -188,7 +174,7 @@ Configure the root app
     kwargs['port'] = config.get(
         'port',
         script_helper.get_conf(
-            cfg, 'apiserver.port', default='9664'
+            cfg, 'apiserver.port', default=9664, datatype=int
         ),
     )
     kwargs['server'] = config.get(
@@ -200,33 +186,28 @@ Configure the root app
     kwargs['debug'] = config.get(
         'debug',
         script_helper.get_conf(
-            cfg, 'apiserver.debug', default=False
+            cfg, 'apiserver.debug', default=False, datatype=bool
         )
     )
     kwargs['quiet'] = config.get(
         'quiet',
         script_helper.get_conf(
-            cfg, 'apiserver.quiet', default=False
+            cfg, 'apiserver.quiet', default=False, datatype=bool
         )
     )
-    mount_apps = {}
-    if 'apps' in config:
-        mount_apps = config['apps']
-    else:
-        apps = script_helper.get_conf(cfg, 'apiserver.apps', default='').split(',')
-        for app in apps:
-            if app:
-                mount, aclass = app.split(':')
-                mount_apps[mount] = aclass
+    mount_apps = config.get(
+        'apps',
+        script_helper.get_conf(
+            cfg, 'apiserver.apps', default={}, datatype=dict
+        )
+    )
 
+    root_app.route('/__doc__', 'GET', functools.partial(build_docs, '/', __name__))
     for mount_point, cls in mount_apps.items():
-        sys.stderr.write('Mounting %s in %s\n' % (cls, mount_point,))
         module = __import__(cls, fromlist=[cls])
         root_app.mount(mount_point, module.bottle_app)
-        root_app.route('%s/__doc__' % (mount_point,), 'GET', build_docs)
-        MODULE_INDEX[mount_point] = module
-
-    MODULE_INDEX['/'] = sys.modules[__name__]
+        path = '%s/__doc__' % (mount_point,)
+        root_app.route(path, 'GET', functools.partial(build_docs, path, cls))
 
     return kwargs
 
