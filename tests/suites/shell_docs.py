@@ -17,13 +17,24 @@ import util
 
 # Select a random port to spin up this testing server
 PORT = port_for.select_random()
+THREADS = {}
+#THREAD.daemon = True
 
 
-def setUpModule():
+def setUp(dt):
 
-    util.start_testing_web_server(PORT)
-    util.ping(PORT)
+    THREADS[dt] = util.TestingServer(PORT)
+    THREADS[dt].start()
+    count = 0
+    while not util.ping(PORT) and count < 50:
+        count += 1
 
+def tearDown(dt):
+
+    THREADS[dt].shutdown()
+    count = 0
+    while util.ping(PORT) and count < 50:
+        count += 1
 
 class TemplatedShellDocTestParser(shelldoctest.ShellDocTestParser):
 
@@ -93,20 +104,23 @@ def test_cases():
     shell_docsuite.addTest(shelldoc_complete)
 
     # Now, for those that *do* have shell examples, test that they are actually correct
+    substitutions={
+        'server_url': 'http://127.0.0.1:%s' % (PORT,),
+        'server_version': clustoapi.__version__,
+    }
     for filename in util.get_source_filenames():
         suite = doctest.DocFileSuite(
             filename,
             module_relative=False,
             parser=TemplatedShellDocTestParser(
-                substitutions={
-                    'server_url': 'http://127.0.0.1:%s' % (PORT,),
-                    'server_version': clustoapi.__version__,
-                },
+                substitutions=substitutions,
             ),
             globs={
                 'system_command': shelldoctest.system_command,
             },
             optionflags=doctest.ELLIPSIS + doctest.REPORT_NDIFF + doctest.NORMALIZE_WHITESPACE,
+            setUp=setUp,
+            tearDown=tearDown
         )
         shell_docsuite.addTest(suite)
     return shell_docsuite

@@ -4,17 +4,80 @@
 # vim:set tabstop=4 softtabstop=4 expandtab shiftwidth=4 fileencoding=utf-8:
 #
 
+import bottle
 import clustoapi
 import inspect
 import os
 import socket
 import threading
 import time
+from wsgiref import simple_server
 
 
 TOP_DIR = os.path.realpath('%s/../../' % (os.path.dirname(os.path.realpath(__file__)),))
 TEST_DIR = os.path.realpath('%s/../' % (os.path.dirname(os.path.realpath(__file__)),))
 SRC_DIR = os.path.join(TOP_DIR, 'src')
+
+
+class TestingWSGIServer(bottle.ServerAdapter):
+
+    server = None
+
+    def run(self, handler):
+        class QuietHandler(simple_server.WSGIRequestHandler):
+            def log_request(*args, **kw):
+                pass
+        self.options['handler_class'] = QuietHandler
+        self.server = simple_server.make_server(
+            self.host, self.port, handler, **self.options
+        )
+        self.server.serve_forever()
+
+    def set_kwargs(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    def stop(self):
+        self.server.shutdown()
+        self.server.server_close()
+
+
+class TestingServer(threading.Thread):
+
+    def __init__(self, port):
+        self.port = port
+        threading.Thread.__init__(self)
+
+    def run(self):
+        conffile = config_for_testing()
+        self.server = TestingWSGIServer()
+        self.kwargs = clustoapi.server._configure(
+            config={
+                'quiet': True,
+                'port': self.port,
+                'host': '127.0.0.1',
+                'apps': get_mount_apps(),
+                'server': self.server,
+            },
+            configfile=conffile
+        )
+        mount_apps = {}
+
+        self.bottle = clustoapi.server.root_app
+
+        for mount_point, cls in mount_apps.items():
+            module = __import__(cls, fromlist=[cls])
+            self.bottle.mount(mount_point, module.bottle_app)
+
+        self.server.set_kwargs(**self.kwargs)
+        self.startup()
+
+    def startup(self):
+        self.bottle.run(**self.kwargs)
+
+    def shutdown(self):
+        self.bottle.close()
+        self.server.stop()
 
 
 def config_for_testing():
@@ -75,16 +138,14 @@ def ping(port):
 Ping the given port until it can establish a TCP connection.
     """
 
-    # Wait until the server is responding requests
-    for i in range(100):
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(('127.0.0.1', port))
+        s.close()
+        return True
+    except socket.error:
         time.sleep(0.1)
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect(('127.0.0.1', port))
-            s.close()
-            break
-        except socket.error:
-            continue
+        return False
 
 
 def get_public_methods(mods):

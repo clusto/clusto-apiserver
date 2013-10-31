@@ -114,7 +114,6 @@ each mounted application, the main __doc__ endpoint, or on the main endpoint::
 
 """
 
-
 #   Get the request path so we can look at the module index
     mod = sys.modules[module]
     docs = ['\n%s\n%s\n%s\n%s' % (
@@ -139,7 +138,10 @@ each mounted application, the main __doc__ endpoint, or on the main endpoint::
     docs.extend(methods)
 
     tpl = string.Template('\n'.join(docs))
-    text = tpl.safe_substitute(server_url=_get_url(), server_version=clustoapi.__version__,)
+    text = tpl.safe_substitute(
+        server_url=_get_url(),
+        server_version=clustoapi.__version__,
+    )
     try:
         from docutils import core
         return core.publish_string(source=text, writer_name='html')
@@ -166,9 +168,9 @@ Configure the root app
     clusto.init_clusto()
     kwargs = {}
     kwargs['host'] = config.get(
-        'bind',
+        'host',
         script_helper.get_conf(
-            cfg, 'apiserver.bind', default='0.0.0.0'
+            cfg, 'apiserver.host', default='0.0.0.0'
         ),
     )
     kwargs['port'] = config.get(
