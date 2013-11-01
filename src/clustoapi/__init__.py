@@ -5,12 +5,3 @@
 #
 
 __version__ = '0.1.0'
-
-import apps
-import server
-import util
-
-# Placate PEP8
-assert apps
-assert server
-assert util
