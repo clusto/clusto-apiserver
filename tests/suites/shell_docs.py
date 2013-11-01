@@ -29,12 +29,14 @@ def setUp(dt):
     while not util.ping(PORT) and count < 50:
         count += 1
 
+
 def tearDown(dt):
 
     THREADS[dt].shutdown()
     count = 0
     while util.ping(PORT) and count < 50:
         count += 1
+
 
 class TemplatedShellDocTestParser(shelldoctest.ShellDocTestParser):
 
@@ -104,7 +106,7 @@ def test_cases():
     shell_docsuite.addTest(shelldoc_complete)
 
     # Now, for those that *do* have shell examples, test that they are actually correct
-    substitutions={
+    substitutions = {
         'server_url': 'http://127.0.0.1:%s' % (PORT,),
         'server_version': clustoapi.__version__,
     }
@@ -128,7 +130,8 @@ def test_cases():
 
 def main():
     runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(test_cases())
+    result = runner.run(test_cases())
+    return (len(result.errors) + len(result.failures)) > 0
 
 
 if __name__ == '__main__':

@@ -52,7 +52,8 @@ def test_cases():
 
 def main():
     runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(test_cases())
+    result = runner.run(test_cases())
+    return (len(result.errors) + len(result.failures)) > 0
 
 
 if __name__ == '__main__':

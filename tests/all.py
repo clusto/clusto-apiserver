@@ -19,7 +19,8 @@ def test_suites():
 
 def main():
     runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(test_suites())
+    result = runner.run(test_suites())
+    return (len(result.errors) + len(result.failures)) > 0
 
 
 if __name__ == '__main__':

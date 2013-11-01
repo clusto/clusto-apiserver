@@ -16,12 +16,24 @@ import util
 
 # Select a random port to spin up this testing server
 PORT = port_for.select_random()
+THREADS = {}
 
 
-def setUpModule():
+def setUp(dt):
 
-    util.start_testing_web_server(PORT)
-    util.ping(PORT)
+    THREADS[dt] = util.TestingServer(PORT)
+    THREADS[dt].start()
+    count = 0
+    while not util.ping(PORT) and count < 50:
+        count += 1
+
+
+def tearDown(dt):
+
+    THREADS[dt].shutdown()
+    count = 0
+    while util.ping(PORT) and count < 50:
+        count += 1
 
 
 class TemplatedDocTestParser(doctest.DocTestParser):
@@ -95,7 +107,9 @@ def test_cases():
                     'server_version': clustoapi.__version__,
                 },
             ),
-            optionflags=doctest.ELLIPSIS,
+            optionflags=doctest.ELLIPSIS + doctest.REPORT_NDIFF + doctest.NORMALIZE_WHITESPACE,
+            setUp=setUp,
+            tearDown=tearDown
         )
         doctest_docsuite.addTest(suite)
     return doctest_docsuite
@@ -103,7 +117,8 @@ def test_cases():
 
 def main():
     runner = unittest.TextTestRunner(verbosity=2)
-    runner.run(test_cases())
+    result = runner.run(test_cases())
+    return (len(result.errors) + len(result.failures)) > 0
 
 
 if __name__ == '__main__':
