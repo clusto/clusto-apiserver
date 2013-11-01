@@ -6,6 +6,7 @@
 
 import bottle
 import clustoapi
+from clustoapi import apps as api_apps
 import inspect
 import os
 import socket
@@ -102,7 +103,7 @@ Return all apps as mountable apps for the main server.
     """
 
     mount_apps = {}
-    for app in clustoapi.apps.__all__:
+    for app in api_apps.__all__:
         mod = 'clustoapi.apps.%s' % (app,)
         mount_apps['/%s' % (app,)] = mod
 
