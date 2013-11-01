@@ -40,6 +40,18 @@ import string
 import sys
 
 
+DOC_SUBSTITUTIONS = {
+    'get': "curl -X GET -G -s -w '\\nHTTP: %{http_code}\\nContent-type: %{content_type}'",
+    'get_i': "curl -X GET -G -si",
+    'post': "curl -X POST -s -w '\\nHTTP: %{http_code}\\nContent-type: %{content_type}'",
+    'post_i': "curl -X POST -si",
+    'put': "curl -X PUT -s -w '\\nHTTP: %{http_code}\\nContent-type: %{content_type}'",
+    'put_i': "curl -X PUT -si",
+    'delete': "curl -X DELETE -s -w '\\nHTTP: %{http_code}\\nContent-type: %{content_type}'",
+    'delete_i': "curl -X DELETE -si",
+    'head': "curl -s -I",
+}
+
 root_app = bottle.Bottle(autojson=False)
 
 
@@ -58,10 +70,13 @@ Returns the server's normalized URL
 @root_app.get('/favicon.ico')
 def favicon():
     """
-Send an HTTP code to clients so they stop asking for favicon. Example::
+Send an HTTP code to clients so they stop asking for favicon. Example:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/favicon.ico
+.. code:: bash
+
+    $ ${get} -o /dev/null ${server_url}/favicon.ico
     HTTP: 410
+    Content-type: text/html; charset=UTF-8
 
 """
 
@@ -72,16 +87,21 @@ Send an HTTP code to clients so they stop asking for favicon. Example::
 @root_app.get('/__version__')
 def show_version():
     """
-This shows the current version running, example::
+This shows the current version running, example
 
-    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/__version__
+.. code:: bash
+
+    $ ${get} ${server_url}/__version__
     "${server_version}"
     HTTP: 200
+    Content-type: application/json
 
 If you make a HEAD request to the / endpoint, the response is also the version
-string, as that's less heavy to build than the regular / page::
+string, as that's less heavy to build than the regular / page:
 
-    $ curl -s -I ${server_url}/
+.. code:: bash
+
+    $ ${head} ${server_url}/
     HTTP/1.0 200 OK
     ...
 
@@ -104,11 +124,14 @@ def _get_mounts_and_modules():
 @root_app.get('/__meta__')
 def meta():
     """
-This call just returns a mapping of all currently installed applications::
+This call just returns a mapping of all currently installed applications.
 
-    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/__meta__
+.. code:: bash
+
+    $ ${get} ${server_url}/__meta__
     ...
     HTTP: 200
+    Content-type: application/json
 
 """
     return clustoapi.util.dumps(_get_mounts_and_modules())
@@ -121,17 +144,25 @@ def build_docs(path='/', module=__name__):
 This will build documentation for the given module and all its methods.
 If python-rest is available, it will attempt to parse it as a restructured
 text document. You can get to the docs by going to the __doc__ endpoint on
-each mounted application, the main __doc__ endpoint, or on the main endpoint::
+each mounted application, the main __doc__ endpoint, or on the main endpoint:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/__doc__
+.. code:: bash
+
+    $ ${get} ${server_url}/__doc__
     <?xml version="1.0" encoding="utf-8" ?>
     ...
     HTTP: 200
+    Content-type: text/html; charset=UTF-8
 
-    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/
+.. code:: bash
+
+    $ ${get} ${server_url}/
     <?xml version="1.0" encoding="utf-8" ?>
     ...
     HTTP: 200
+    Content-type: text/html; charset=UTF-8
+
+.. code:: bash
 
     $ diff -q <( curl -s ${server_url}/__doc__ ) <( curl -s ${server_url}/ ) && echo equal || echo diff
     equal
@@ -174,6 +205,7 @@ each mounted application, the main __doc__ endpoint, or on the main endpoint::
     text = tpl.safe_substitute(
         server_url=_get_url(),
         server_version=clustoapi.__version__,
+        **DOC_SUBSTITUTIONS
     )
     try:
         from docutils import core

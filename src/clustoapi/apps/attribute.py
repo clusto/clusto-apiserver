@@ -22,33 +22,47 @@ def attrs(name, driver=None):
     """
 Query attributes from this object.
 
-Example::
+Example:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=attrpool1' ${server_url}/entity/pool
+.. code:: bash
+
+    $ ${post} -d 'name=attrpool1' ${server_url}/entity/pool
     [
         "/pool/attrpool1"
     ]
     HTTP: 201
+    Content-type: application/json
 
-    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/attribute/attrpool1
+.. code:: bash
+
+    $ ${get} ${server_url}/attribute/attrpool1
     []
     HTTP: 200
+    Content-type: application/json
 
-Will show all the attributes from the object ``attrpool1``::
+Will show all the attributes from the object ``attrpool1``:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/attribute/attrpool1/pool
+.. code:: bash
+
+    $ ${get} ${server_url}/attribute/attrpool1/pool
     []
     HTTP: 200
+    Content-type: application/json
 
 Will show all the attributes from the object ``attrpool1`` **if** the driver
 for ``attrpool1`` is ``pool``
 
-Example::
+Example:
 
-    curl -d "key=owner" -d "value=joe" ${server_url}/e/server/server1
+.. code:: bash
+
+    $ ${get} -d 'key=owner' -d 'value=joe' ${server_url}/attribute/attrpool1
+    []
+    HTTP: 200
+    Content-type: application/json
 
 Will show the attributes for ``server1`` if their key is ``owner`` *and*
-the subkey is ``joe``
+the value is ``joe``
 """
 
     attrs = []
@@ -71,15 +85,20 @@ Add an attribute to this object.
  *  Requires HTTP parameters ``name``, ``key``, and ``value``
  *  Optional parameters are ``subkey`` and ``number``
 
-Example::
+Example:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=addattrserver' ${server_url}/entity/basicserver
+.. code:: bash
+
+    $ ${post} -d 'name=addattrserver' ${server_url}/entity/basicserver
     [
         "/basicserver/addattrserver"
     ]
     HTTP: 201
+    Content-type: application/json
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'key=group' -d 'value=web' ${server_url}/attribute/addattrserver
+.. code:: bash
+
+    $ ${post} -d 'key=group' -d 'value=web' ${server_url}/attribute/addattrserver
     [
         {
             "datatype": "string",
@@ -90,15 +109,18 @@ Example::
         }
     ]
     HTTP: 200
+    Content-type: application/json
 
 Will:
 
 #.  Create an entity called ``addattrserver``
 #.  Add the attribute with ``key=group`` and ``value=web`` to it
 
-Example::
+Example:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'key=group' -d 'subkey=owner' -d 'value=web' ${server_url}/attribute/addattrserver
+.. code:: bash
+
+    $ ${post} -d 'key=group' -d 'subkey=owner' -d 'value=web' ${server_url}/attribute/addattrserver
     [
         {
             "datatype": "string",
@@ -116,6 +138,7 @@ Example::
         }
     ]
     HTTP: 200
+    Content-type: application/json
 
 Will add the attribute with key ``group`` *and* subkey ``owner`` *and*
 value ``joe`` to the previously created entity ``addattrserver``
@@ -150,15 +173,20 @@ updated.
  *  Requires HTTP parameters ``key`` and ``value``
  *  Optional parameters are ``subkey`` and ``number``
 
-Example::
+Example:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=setattrserver' ${server_url}/entity/basicserver
+.. code:: bash
+
+    $ ${post} -d 'name=setattrserver' ${server_url}/entity/basicserver
     [
         "/basicserver/setattrserver"
     ]
     HTTP: 201
+    Content-type: application/json
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'key=group' -d 'value=web' ${server_url}/attribute/setattrserver
+.. code:: bash
+
+    $ ${post} -d 'key=group' -d 'value=web' ${server_url}/attribute/setattrserver
     [
         {
             "datatype": "string",
@@ -169,8 +197,11 @@ Example::
         }
     ]
     HTTP: 200
+    Content-type: application/json
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X PUT -d 'key=group' -d 'value=db' ${server_url}/attribute/setattrserver
+.. code:: bash
+
+    $ ${put} -d 'key=group' -d 'value=db' ${server_url}/attribute/setattrserver
     [
         {
             "datatype": "string",
@@ -181,6 +212,7 @@ Example::
         }
     ]
     HTTP: 200
+    Content-type: application/json
 
 Will:
 
@@ -188,15 +220,20 @@ Will:
 #.  Add the attribute with ``key=group`` and ``value=web``
 #.  Update the attribute to ``value=db``
 
-Example::
+Example:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=setattrserver2' ${server_url}/entity/basicserver
+.. code:: bash
+
+    $ ${post} -d 'name=setattrserver2' ${server_url}/entity/basicserver
     [
         "/basicserver/setattrserver2"
     ]
     HTTP: 201
+    Content-type: application/json
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X PUT -d 'key=group' -d 'subkey=owner' -d 'value=joe' ${server_url}/attribute/setattrserver2
+.. code:: bash
+
+    $ ${put} -d 'key=group' -d 'subkey=owner' -d 'value=joe' ${server_url}/attribute/setattrserver2
     [
         {
             "datatype": "string",
@@ -207,8 +244,11 @@ Example::
         }
     ]
     HTTP: 200
+    Content-type: application/json
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X PUT -d 'key=group' -d 'subkey=owner' -d 'value=bob' ${server_url}/attribute/setattrserver2
+.. code:: bash
+
+    $ ${put} -d 'key=group' -d 'subkey=owner' -d 'value=bob' ${server_url}/attribute/setattrserver2
     [
         {
             "datatype": "string",
@@ -219,6 +259,7 @@ Example::
         }
     ]
     HTTP: 200
+    Content-type: application/json
 
 Will:
 
@@ -251,15 +292,20 @@ Deletes an attribute from this object
  *  Requires HTTP parameters ``key``
  *  Optional parameters are ``subkey``, ``value``, and ``number``
 
-Examples::
+Examples:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=deleteserver1' ${server_url}/entity/basicserver
+.. code:: bash
+
+    $ ${post} -d 'name=deleteserver1' ${server_url}/entity/basicserver
     [
         "/basicserver/deleteserver1"
     ]
     HTTP: 201
+    Content-type: application/json
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X PUT -d 'key=group' -d 'subkey=owner' -d 'value=joe' ${server_url}/attribute/deleteserver1
+.. code:: bash
+
+    $ ${put} -d 'key=group' -d 'subkey=owner' -d 'value=joe' ${server_url}/attribute/deleteserver1
     [
         {
             "datatype": "string",
@@ -270,27 +316,17 @@ Examples::
         }
     ]
     HTTP: 200
+    Content-type: application/json
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X DELETE -d 'key=group' -d 'subkey=owner' ${server_url}/attribute/deleteserver1
+.. code:: bash
+
+    $ ${delete} -d 'key=group' -d 'subkey=owner' ${server_url}/attribute/deleteserver1
     []
     HTTP: 200
+    Content-type: application/json
 
 Will create a ``basicserver`` object called ``deleteserver1``, then it will
 add an attribute (the only attribute so far), then it will delete it.
-
-Example::
-
-    curl -X POST -d "key=group" -d "subkey=owner" -d "value=joe" ${server_url}/e/server/server1
-
-Will delete the attribute with key ``group`` *and* subkey ``owner`` *and*
-value ``web`` from the object ``server1``.
-
-Example::
-
-    curl -X POST -d "key=group" ${server_url}/e/server/server1
-
-Will delete *all the attributes* with key ``group`` from the object
-``server1``, regardless of subkeys or values.
 """
 
     kwargs = dict(request.params.items())

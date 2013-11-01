@@ -5,6 +5,7 @@
 #
 
 import clustoapi
+from clustoapi import server
 import doctest
 import functools
 import port_for
@@ -110,6 +111,7 @@ def test_cases():
         'server_url': 'http://127.0.0.1:%s' % (PORT,),
         'server_version': clustoapi.__version__,
     }
+    substitutions.update(server.DOC_SUBSTITUTIONS)
     for filename in util.get_source_filenames():
         suite = doctest.DocFileSuite(
             filename,

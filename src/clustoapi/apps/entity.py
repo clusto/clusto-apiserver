@@ -23,31 +23,40 @@ def get_entities(driver=None):
     """
 Returns all entities, or (optionally) all entities of the given driver
 
-Example::
+Example:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/entity/
+.. code:: bash
+
+    $ ${get} ${server_url}/entity/
     [
         ...
     ]
     HTTP: 200
+    Content-type: application/json
 
 Will list all entities
 
-Example::
+Example:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/entity/clustometa
+.. code:: bash
+
+    $ ${get} ${server_url}/entity/clustometa
     [
         "/clustometa/clustometa"
     ]
     HTTP: 200
+    Content-type: application/json
 
 Will list all entities that match the driver ``clustometa``
 
-The following example should fail because there is no driver ``nondriver``::
+The following example should fail because there is no driver ``nondriver``:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/entity/nondriver
+.. code:: bash
+
+    $ ${get} ${server_url}/entity/nondriver
     "The requested driver \"nondriver\" does not exist"
     HTTP: 409
+    Content-type: application/json
 
 """
 
@@ -84,19 +93,24 @@ Creates a new object of the given driver.
 
  *  Requires HTTP parameters ``name``
 
-Example::
+Example:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=createpool1' ${server_url}/entity/pool
+.. code:: bash
+
+    $ ${post} -d 'name=createpool1' ${server_url}/entity/pool
     [
         "/pool/createpool1"
     ]
     HTTP: 201
+    Content-type: application/json
 
 Will create a new ``pool1`` object with a ``pool`` driver. If the
 ``pool1`` object already exists, the status code returned will be 202,
-and you will see whatever warnings in the ``Warnings`` header::
+and you will see whatever warnings in the ``Warnings`` header:
 
-    $ curl -si -X POST -d 'name=createpool1' ${server_url}/entity/pool
+.. code:: bash
+
+    $ ${post_i} -d 'name=createpool1' ${server_url}/entity/pool
     HTTP/1.0 202 Accepted
     ...
     Warnings: Entity(s) /pool/createpool1 already exist(s)...
@@ -105,15 +119,20 @@ and you will see whatever warnings in the ``Warnings`` header::
     ]
 
 If you try to create a server of an unknown driver, you should receive
-a 409 status code back::
+a 409 status code back:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=createobject' ${server_url}/entity/nondriver
+.. code:: bash
+
+    $ ${post} -d 'name=createobject' ${server_url}/entity/nondriver
     "Requested driver \"nondriver\" does not exist"
     HTTP: 409
+    Content-type: application/json
 
-The following example::
+The following example:
 
-    $ curl -si -X POST -d 'name=createpool1' -d 'name=createpool2' ${server_url}/entity/pool
+.. code:: bash
+
+    $ ${post_i} -d 'name=createpool1' -d 'name=createpool2' ${server_url}/entity/pool
     HTTP/1.0 202 Accepted
     ...
     Warnings: Entity(s) /pool/createpool1 already exist(s)...
@@ -163,23 +182,35 @@ Deletes an object if it matches the given driver
 
  *  Requires HTTP parameters ``name``
 
-Examples::
+Examples:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=servercreated' ${server_url}/entity/basicserver
+.. code:: bash
+
+    $ ${post} -d 'name=servercreated' ${server_url}/entity/basicserver
     [
         "/basicserver/servercreated"
     ]
     HTTP: 201
+    Content-type: application/json
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X DELETE -d 'name=servercreated' ${server_url}/entity/nondriver
+.. code:: bash
+
+    $ ${delete} -d 'name=servercreated' ${server_url}/entity/nondriver
     "Requested driver \"nondriver\" does not exist"
     HTTP: 409
+    Content-type: application/json
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X DELETE -d 'name=servercreated' ${server_url}/entity/basicserver
+.. code:: bash
+
+    $ ${delete} -d 'name=servercreated' ${server_url}/entity/basicserver
     HTTP: 204
+    Content-type: 
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X DELETE -d 'name=servercreated' ${server_url}/entity/basicserver
+.. code:: bash
+
+    $ ${delete} -d 'name=servercreated' ${server_url}/entity/basicserver
     HTTP: 404
+    Content-type: text/html; charset=UTF-8
 
 Will create a new ``servercreated`` object with a ``basicserver`` driver. Then
 it will proceed to delete it. If the operation succeeded, it will return a 200,
@@ -215,15 +246,20 @@ def show(driver, name):
     """
 Returns a json representation of the given object
 
-Example::
+Example:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=showpool' ${server_url}/entity/pool
+.. code:: bash
+
+    $ ${post} -d 'name=showpool' ${server_url}/entity/pool
     [
         "/pool/showpool"
     ]
     HTTP: 201
+    Content-type: application/json
 
-    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/entity/pool/showpool
+.. code:: bash
+
+    $ ${get} ${server_url}/entity/pool/showpool
     {
         "attrs": [],
         "contents": [],
@@ -232,6 +268,7 @@ Example::
         "parents": []
     }
     HTTP: 200
+    Content-type: application/json
 
 Will return a JSON representation of the previously created ``showpool``.
 
@@ -249,21 +286,29 @@ def insert(driver, name):
     """
 Inserts the given device from the request parameters into the object
 
-Example::
+Example:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=insertpool' ${server_url}/entity/pool
+.. code:: bash
+
+    $ ${post} -d 'name=insertpool' ${server_url}/entity/pool
     [
         "/pool/insertpool"
     ]
     HTTP: 201
+    Content-type: application/json
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=insertserver' ${server_url}/entity/basicserver
+.. code:: bash
+
+    $ ${post} -d 'name=insertserver' ${server_url}/entity/basicserver
     [
         "/basicserver/insertserver"
     ]
     HTTP: 201
+    Content-type: application/json
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X PUT -d 'device=insertserver' ${server_url}/entity/pool/insertpool
+.. code:: bash
+
+    $ ${put} -d 'device=insertserver' ${server_url}/entity/pool/insertpool
     {
         "attrs": [],
         "contents": [
@@ -274,6 +319,7 @@ Example::
         "parents": []
     }
     HTTP: 200
+    Content-type: application/json
 
 Will:
 
@@ -281,22 +327,30 @@ Will:
 #.  Create a basicserver entity called ``insertserver``
 #.  Insert the entity ``insertserver`` into the entity ``insertpool``
 
-Examples::
+Examples:
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=insertpool2' ${server_url}/entity/pool
+.. code:: bash
+
+    $ ${post} -d 'name=insertpool2' ${server_url}/entity/pool
     [
         "/pool/insertpool2"
     ]
     HTTP: 201
+    Content-type: application/json
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X POST -d 'name=insertserver2' -d 'name=insertserver3' ${server_url}/entity/basicserver
+.. code:: bash
+
+    $ ${post} -d 'name=insertserver2' -d 'name=insertserver3' ${server_url}/entity/basicserver
     [
         "/basicserver/insertserver2",
         "/basicserver/insertserver3"
     ]
     HTTP: 201
+    Content-type: application/json
 
-    $ curl -s -w '\\nHTTP: %{http_code}' -X PUT -d 'device=insertserver2' -d 'device=insertserver3' ${server_url}/entity/pool/insertpool2
+.. code:: bash
+
+    $ ${put} -d 'device=insertserver2' -d 'device=insertserver3' ${server_url}/entity/pool/insertpool2
     {
         "attrs": [],
         "contents": [
@@ -308,6 +362,7 @@ Examples::
         "parents": []
     }
     HTTP: 200
+    Content-type: application/json
 
 The above will:
 
