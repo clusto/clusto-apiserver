@@ -4,6 +4,7 @@
 # vim:set tabstop=4 softtabstop=4 expandtab shiftwidth=4 fileencoding=utf-8:
 #
 
+import bottle
 import clusto
 import json
 
@@ -38,14 +39,17 @@ the driver given. Returns:
     return obj, status, msg
 
 
-def dumps(obj):
+def dumps(obj, code=200, **headers):
     """
 """
-    result = json.dumps(
-        obj, indent=4, sort_keys=True,
-        separators=(',', ': ')
+    return bottle.HTTPResponse(
+        json.dumps(
+            obj, indent=4, sort_keys=True,
+            separators=(',', ': ')
+        ),
+        code,
+        content_type='application/json'
     )
-    return result
 
 
 def unclusto(obj):
