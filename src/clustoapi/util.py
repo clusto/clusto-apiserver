@@ -39,7 +39,7 @@ the driver given. Returns:
     return obj, status, msg
 
 
-def dumps(obj, code=200, **headers):
+def dumps(obj, code=200, headers={}):
     """
 """
     return bottle.HTTPResponse(
@@ -48,7 +48,8 @@ def dumps(obj, code=200, **headers):
             separators=(',', ': ')
         ),
         code,
-        content_type='application/json'
+        content_type='application/json',
+        **headers
     )
 
 

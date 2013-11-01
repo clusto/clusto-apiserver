@@ -87,7 +87,7 @@ string, as that's less heavy to build than the regular / page::
 
     """
 
-    return u'%s' % (clustoapi.util.dumps(clustoapi.__version__),)
+    return clustoapi.util.dumps(clustoapi.__version__)
 
 
 def _get_mounts_and_modules():
@@ -103,7 +103,15 @@ def _get_mounts_and_modules():
 
 @root_app.get('/__meta__')
 def meta():
-    return _get_mounts_and_modules()
+    """
+This call just returns a mapping of all currently installed applications::
+
+    $ curl -s -w '\\nHTTP: %{http_code}' ${server_url}/__meta__
+    ...
+    HTTP: 200
+
+"""
+    return clustoapi.util.dumps(_get_mounts_and_modules())
 
 
 @root_app.get('/')

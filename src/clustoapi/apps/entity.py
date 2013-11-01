@@ -59,10 +59,7 @@ The following example should fail because there is no driver ``nondriver``::
         if driver in clusto.driverlist:
             kwargs['clusto_drivers'] = [clusto.driverlist[driver]]
         else:
-            return bottle.HTTPResponse(
-                util.dumps('The requested driver "%s" does not exist' % (driver,)),
-                409
-            )
+            return util.dumps('The requested driver "%s" does not exist' % (driver,), 409)
     ents = clusto.get_entities(**kwargs)
     for ent in ents:
         result.append(util.unclusto(ent))
@@ -156,7 +153,7 @@ an extra header ``Warnings`` with the message.
     code = 201
     if found:
         code = 202
-    return util.dumps(result, code, **headers)
+    return util.dumps(result, code, headers=headers)
 
 
 @bottle_app.delete('/<driver>')
