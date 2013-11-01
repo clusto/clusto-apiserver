@@ -13,7 +13,8 @@ import clusto
 from clustoapi import util
 
 
-bottle_app = bottle.Bottle()
+bottle_app = bottle.Bottle(autojson=False)
+bottle_app.config['source_module'] = __name__
 
 
 @bottle_app.get('/')
@@ -132,10 +133,7 @@ an extra header ``Warnings`` with the message.
 """
 
     if driver not in clusto.driverlist:
-        return bottle.HTTPResponse(
-            util.dumps('Requested driver "%s" does not exist' % (driver,)),
-            409,
-        )
+        return util.dumps('Requested driver "%s" does not exist' % (driver,), 409)
     cls = clusto.driverlist[driver]
     names = request.params.getall('name')
     request.params.pop('name')
@@ -158,7 +156,7 @@ an extra header ``Warnings`` with the message.
     code = 201
     if found:
         code = 202
-    return bottle.HTTPResponse(util.dumps(result), code, **headers)
+    return util.dumps(result, code, **headers)
 
 
 @bottle_app.delete('/<driver>')
@@ -193,10 +191,7 @@ if the object doesn't exist, it will return a 404.
 """
 
     if driver not in clusto.driverlist:
-        return bottle.HTTPResponse(
-            util.dumps('Requested driver "%s" does not exist' % (driver,)),
-            409,
-        )
+        return util.dumps('Requested driver "%s" does not exist' % (driver,), 409)
 
     names = request.params.getall('name')
 
@@ -247,7 +242,7 @@ Will return a JSON representation of the previously created ``showpool``.
 
     obj, status, msg = util.object(name, driver)
     if not obj:
-        return bottle.HTTPResponse(util.dumps(msg), status)
+        return util.dumps(msg, status)
 
     return util.dumps(util.show(obj))
 
@@ -327,7 +322,7 @@ The above will:
 
     obj, status, msg = util.object(name, driver)
     if not obj:
-        return bottle.HTTPResponse(util.dumps(msg), status)
+        return util.dumps(msg, status)
     devices = request.params.getall('device')
 
     devobjs = []

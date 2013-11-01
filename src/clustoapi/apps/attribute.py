@@ -13,6 +13,7 @@ from clustoapi import util
 
 
 bottle_app = bottle.Bottle()
+bottle_app.config['source_module'] = __name__
 
 
 @bottle_app.get('/<name>')
@@ -54,7 +55,7 @@ the subkey is ``joe``
     kwargs = dict(request.params.items())
     obj, status, msg = util.object(name, driver)
     if not obj:
-        return bottle.HTTPResponse(util.dumps(msg), status)
+        return util.dumps(msg, status)
 
     for attr in obj.attrs(**kwargs):
         attrs.append(util.unclusto(attr))
@@ -124,7 +125,7 @@ value ``joe`` to the previously created entity ``addattrserver``
     kwargs = dict(request.params.items())
     obj, status, msg = util.object(name, driver)
     if not obj:
-        return bottle.HTTPResponse(util.dumps(msg), status)
+        return util.dumps(msg, status)
 
     for k in ('key', 'value'):
         if k not in kwargs.keys():
@@ -231,7 +232,7 @@ Will:
     kwargs = dict(request.params.items())
     obj, status, msg = util.object(name, driver)
     if not obj:
-        return bottle.HTTPResponse(util.dumps(msg), status)
+        return util.dumps(msg, status)
     for k in ('key', 'value'):
         if k not in kwargs.keys():
             bottle.abort(412, 'Provide at least "key" and "value"')
@@ -295,7 +296,7 @@ Will delete *all the attributes* with key ``group`` from the object
     kwargs = dict(request.params.items())
     obj, status, msg = util.object(name, driver)
     if not obj:
-        return bottle.HTTPResponse(util.dumps(msg), status)
+        return util.dumps(msg, status)
     if 'key' not in kwargs.keys():
         bottle.abort(412, 'Provide at least "key" and "value"')
     if 'number' in kwargs:

@@ -40,7 +40,7 @@ import string
 import sys
 
 
-root_app = bottle.Bottle()
+root_app = bottle.Bottle(autojson=False)
 
 
 def _get_url(path=False):
@@ -79,7 +79,7 @@ This shows the current version running, example::
     HTTP: 200
 
 If you make a HEAD request to the / endpoint, the response is also the version
-string, as that's less heavy to build than the regular / page
+string, as that's less heavy to build than the regular / page::
 
     $ curl -s -I ${server_url}/
     HTTP/1.0 200 OK
@@ -88,6 +88,22 @@ string, as that's less heavy to build than the regular / page
     """
 
     return u'%s' % (clustoapi.util.dumps(clustoapi.__version__),)
+
+
+def _get_mounts_and_modules():
+    mods = {}
+    for route in root_app.routes:
+        mp = route.config.get('mountpoint')
+        if mp:
+            target = mp.get('target')
+            if target and target.config.get('source_module'):
+                mods[mp['prefix']] = target.config['source_module']
+    return mods
+
+
+@root_app.get('/__meta__')
+def meta():
+    return _get_mounts_and_modules()
 
 
 @root_app.get('/')
@@ -121,6 +137,15 @@ each mounted application, the main __doc__ endpoint, or on the main endpoint::
         mod.__name__,
         '=' * len(mod.__name__),
         mod.__doc__)]
+
+    if path == '/':
+        mods = _get_mounts_and_modules()
+        if mods:
+            docs.append('\nMounted Applications\n%s\n' % ('-' * 20, ))
+            for k, v in mods.items():
+                docs.append(
+                    '\n * `%s <${server_url}%s/__doc__>`_\n' % (v, k,)
+                )
 
     docs.append('\nDocument strings for this module\n%s\n' % ('-' * 32,))
     toc = []
@@ -164,7 +189,7 @@ Configure the root app
         )
     cfg = script_helper.load_config(cfg)
     clusto.connect(cfg)
-    # This is an idempotent operation
+#   This is an idempotent operation
     clusto.init_clusto()
     kwargs = {}
     kwargs['host'] = config.get(
@@ -195,6 +220,12 @@ Configure the root app
         'quiet',
         script_helper.get_conf(
             cfg, 'apiserver.quiet', default=False, datatype=bool
+        )
+    )
+    kwargs['reloader'] = config.get(
+        'reloader',
+        script_helper.get_conf(
+            cfg, 'apiserver.reloader', default=False, datatype=bool
         )
     )
     mount_apps = config.get(
