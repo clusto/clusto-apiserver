@@ -14,13 +14,19 @@ install_requires = [
     'bottle',
 ]
 
+# only required when you are doing testing
 test_requires = [
     'shelldoctest',
     'pep8',
     'port-for',
 ]
 
+# These are not required, but give you nice colors in the UI
 develop_requires = test_requires
+develop_requires.extend([
+    'docutils',
+    'Pygments',
+])
 
 args = sys.argv[1:]
 # if we are installing just punt all extra reqs and do install_requires only

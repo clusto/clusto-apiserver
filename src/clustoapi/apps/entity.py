@@ -204,7 +204,7 @@ Examples:
 
     $ ${delete} -d 'name=servercreated' ${server_url}/entity/basicserver
     HTTP: 204
-    Content-type: 
+    Content-type:
 
 .. code:: bash
 
@@ -238,7 +238,7 @@ if the object doesn't exist, it will return a 404.
         for obj in objs:
             obj.entity.delete()
 
-    return bottle.HTTPResponse('', code)
+    return bottle.HTTPResponse('', code, headers={'content_type': None})
 
 
 @bottle_app.get('/<driver>/<name>')

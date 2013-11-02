@@ -154,17 +154,19 @@ each mounted application, the main __doc__ endpoint, or on the main endpoint:
     HTTP: 200
     Content-type: text/html; charset=UTF-8
 
+If you pass the ``Accept`` headers and specify ``text/plain``, you should get
+the plain text version back
+
 .. code:: bash
 
-    $ ${get} ${server_url}/
-    <?xml version="1.0" encoding="utf-8" ?>
+    $ ${get} -H 'Accept: text/plain' ${server_url}/__doc__
     ...
     HTTP: 200
-    Content-type: text/html; charset=UTF-8
+    Content-type: text/plain
 
 .. code:: bash
 
-    $ diff -q <( curl -s ${server_url}/__doc__ ) <( curl -s ${server_url}/ ) && echo equal || echo diff
+    $ diff -q <( curl -s -H 'Accept: text/plain' ${server_url}/__doc__ ) <( curl -s -H 'Accept: text/plain' ${server_url}/ ) && echo equal || echo diff
     equal
 
 """
@@ -207,10 +209,15 @@ each mounted application, the main __doc__ endpoint, or on the main endpoint:
         server_version=clustoapi.__version__,
         **DOC_SUBSTITUTIONS
     )
-    try:
-        from docutils import core
-        return core.publish_string(source=text, writer_name='html')
-    except ImportError:
+    accept = bottle.request.headers.get('accept', 'text/plain')
+    if accept != 'text/plain':
+        try:
+            from docutils import core
+            return core.publish_string(source=text, writer_name='html')
+        except ImportError:
+            bottle.response.content_type = 'text/plain'
+            return text
+    else:
         bottle.response.content_type = 'text/plain'
         return text
 
