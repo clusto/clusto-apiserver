@@ -108,7 +108,7 @@ Example:
             "value": "web"
         }
     ]
-    HTTP: 200
+    HTTP: 201
     Content-type: application/json
 
 Will:
@@ -137,7 +137,7 @@ Example:
             "value": "web"
         }
     ]
-    HTTP: 200
+    HTTP: 201
     Content-type: application/json
 
 Will add the attribute with key ``group`` *and* subkey ``owner`` *and*
@@ -159,7 +159,7 @@ value ``joe`` to the previously created entity ``addattrserver``
 
     obj.add_attr(**kwargs)
 
-    return util.dumps([util.unclusto(_) for _ in obj.attrs()])
+    return util.dumps([util.unclusto(_) for _ in obj.attrs()], 201)
 
 
 @bottle_app.put('/<name>')
@@ -196,7 +196,7 @@ Example:
             "value": "web"
         }
     ]
-    HTTP: 200
+    HTTP: 201
     Content-type: application/json
 
 .. code:: bash
