@@ -7,6 +7,12 @@
 # Copyright 2010, Jeremy Grosser <jeremy@synack.me>
 # Copyright 2013, Jorge Gallegos <kad@blegh.net>
 
+"""
+The ``entity`` application will hold all methods related to entity management
+in clusto. That is: creation, querying, modification and overall entity
+manipulation.
+"""
+
 import bottle
 from bottle import request
 import clusto

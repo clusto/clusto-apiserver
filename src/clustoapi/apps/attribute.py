@@ -7,6 +7,11 @@
 # Copyright 2010, Jeremy Grosser <jeremy@synack.me>
 # Copyright 2013, Jorge Gallegos <kad@blegh.net>
 
+"""
+The ``attribute`` application handles all attribute specific operations like
+querying, adding, deleting and updating attributes.
+"""
+
 import bottle
 from bottle import request
 from clustoapi import util

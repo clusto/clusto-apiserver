@@ -177,7 +177,7 @@ the plain text version back
         '=' * len(mod.__name__),
         mod.__name__,
         '=' * len(mod.__name__),
-        mod.__doc__)]
+        mod.__doc__ or '')]
 
     if path == '/':
         mods = _get_mounts_and_modules()
@@ -188,7 +188,7 @@ the plain text version back
                     '\n * `%s <${server_url}%s/__doc__>`_\n' % (v, k,)
                 )
 
-    docs.append('\nDocument strings for this module\n%s\n' % ('-' * 32,))
+    docs.append('\nModule methods\n%s\n' % ('-' * 32,))
     toc = []
     methods = []
     for name in dir(mod):
