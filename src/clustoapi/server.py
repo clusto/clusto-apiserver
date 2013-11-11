@@ -242,7 +242,7 @@ Configure the root app
     kwargs['host'] = config.get(
         'host',
         script_helper.get_conf(
-            cfg, 'apiserver.host', default='0.0.0.0'
+            cfg, 'apiserver.host', default='127.0.0.1'
         ),
     )
     kwargs['port'] = config.get(
