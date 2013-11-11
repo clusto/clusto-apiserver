@@ -17,8 +17,10 @@ bottle_app.config['source_module'] = __name__
 
 
 @bottle_app.get('/<name>')
-@bottle_app.get('/<name>/<driver>')
-def attrs(name, driver=None):
+@bottle_app.get('/<name>/<key>')
+@bottle_app.get('/<name>/<key>/<subkey>')
+@bottle_app.get('/<name>/<key>/<subkey>/<number:int>')
+def attrs(name, key=None, subkey=None, number=None):
     """
 Query attributes from this object.
 
@@ -44,41 +46,57 @@ Will show all the attributes from the object ``attrpool1``:
 
 .. code:: bash
 
-    $ ${get} ${server_url}/attribute/attrpool1/pool
+    $ ${get} -d 'driver=pool' ${server_url}/attribute/attrpool1
     []
     HTTP: 200
     Content-type: application/json
 
 Will show all the attributes from the object ``attrpool1`` **if** the driver
-for ``attrpool1`` is ``pool``
+for ``attrpool1`` is ``pool``. In the same vein this code:
+
+.. code:: bash
+
+    $ ${get} -d 'driver=basicserver' ${server_url}/attribute/attrpool1
+    ...
+    HTTP: 409
+    ...
+
+Should fail, because the ``attrpool1`` object is of type ``pool``,
+**not** ``basicserver``
 
 Example:
 
 .. code:: bash
 
-    $ ${get} -d 'key=owner' -d 'value=joe' ${server_url}/attribute/attrpool1
+    $ ${get} ${server_url}/attribute/attrpool1/owner
     []
     HTTP: 200
     Content-type: application/json
 
-Will show the attributes for ``server1`` if their key is ``owner`` *and*
-the value is ``joe``
+Will show the attributes for ``server1`` if their key is ``owner``.
 """
 
     attrs = []
     kwargs = dict(request.params.items())
+    driver = kwargs.get('driver', None)
     obj, status, msg = util.object(name, driver)
     if not obj:
         return util.dumps(msg, status)
 
-    for attr in obj.attrs(**kwargs):
+    qkwargs = {}
+    if key:
+        qkwargs['key'] = key
+    if subkey:
+        qkwargs['subkey'] = subkey
+    if number:
+        qkwargs['number'] = number
+    for attr in obj.attrs(**qkwargs):
         attrs.append(util.unclusto(attr))
     return util.dumps(attrs)
 
 
 @bottle_app.post('/<name>')
-@bottle_app.post('/<name>/<driver>')
-def add_attr(name, driver=None):
+def add_attr(name):
     """
 Add an attribute to this object.
 
@@ -146,6 +164,7 @@ value ``joe`` to the previously created entity ``addattrserver``
 """
 
     kwargs = dict(request.params.items())
+    driver = kwargs.get('driver', None)
     obj, status, msg = util.object(name, driver)
     if not obj:
         return util.dumps(msg, status)
@@ -162,9 +181,10 @@ value ``joe`` to the previously created entity ``addattrserver``
     return util.dumps([util.unclusto(_) for _ in obj.attrs()], 201)
 
 
-@bottle_app.put('/<name>')
-@bottle_app.put('/<name>/<driver>')
-def set_attr(name, driver=None):
+@bottle_app.put('/<name>/<key>')
+@bottle_app.put('/<name>/<key>/<subkey>')
+@bottle_app.put('/<name>/<key>/<subkey>/<number:int>')
+def set_attr(name, key, subkey=None, number=None):
     """
 Sets an attribute from this object. If the attribute doesn't exist
 it will be added, if the attribute already exists then it will be
@@ -201,7 +221,7 @@ Example:
 
 .. code:: bash
 
-    $ ${put} -d 'key=group' -d 'value=db' ${server_url}/attribute/setattrserver
+    $ ${put} -d 'value=db' ${server_url}/attribute/setattrserver/group
     [
         {
             "datatype": "string",
@@ -233,7 +253,7 @@ Example:
 
 .. code:: bash
 
-    $ ${put} -d 'key=group' -d 'subkey=owner' -d 'value=joe' ${server_url}/attribute/setattrserver2
+    $ ${put} -d 'value=joe' ${server_url}/attribute/setattrserver2/group/owner
     [
         {
             "datatype": "string",
@@ -248,7 +268,7 @@ Example:
 
 .. code:: bash
 
-    $ ${put} -d 'key=group' -d 'subkey=owner' -d 'value=bob' ${server_url}/attribute/setattrserver2
+    $ ${put} -d 'value=bob' ${server_url}/attribute/setattrserver2/group/owner
     [
         {
             "datatype": "string",
@@ -271,25 +291,23 @@ Will:
 """
 
     kwargs = dict(request.params.items())
-    obj, status, msg = util.object(name, driver)
+    obj, status, msg = util.object(name)
     if not obj:
         return util.dumps(msg, status)
-    for k in ('key', 'value'):
-        if k not in kwargs.keys():
-            bottle.abort(412, 'Provide at least "key" and "value"')
-    if 'number' in kwargs:
-        kwargs['number'] = int(kwargs['number'])
-    obj.set_attr(**kwargs)
+    if 'value' not in kwargs.keys():
+        bottle.abort(412, 'Provide at least "key" and "value"')
+    obj.set_attr(key=key, subkey=subkey, number=number, value=kwargs['value'])
     return util.dumps([util.unclusto(_) for _ in obj.attrs()])
 
 
-@bottle_app.delete('/<name>')
-@bottle_app.delete('/<name>/<driver>')
-def del_attrs(name, driver=None):
+@bottle_app.delete('/<name>/<key>')
+@bottle_app.delete('/<name>/<key>/<subkey>')
+@bottle_app.delete('/<name>/<key>/<subkey>/<number:int>')
+def del_attrs(name, key, subkey=None, number=None):
     """
 Deletes an attribute from this object
 
- *  Requires HTTP parameters ``key``
+ *  Requires HTTP path ``key``
  *  Optional parameters are ``subkey``, ``value``, and ``number``
 
 Examples:
@@ -305,7 +323,7 @@ Examples:
 
 .. code:: bash
 
-    $ ${put} -d 'key=group' -d 'subkey=owner' -d 'value=joe' ${server_url}/attribute/deleteserver1
+    $ ${put} -d 'value=joe' ${server_url}/attribute/deleteserver1/group/owner
     [
         {
             "datatype": "string",
@@ -320,22 +338,88 @@ Examples:
 
 .. code:: bash
 
-    $ ${delete} -d 'key=group' -d 'subkey=owner' ${server_url}/attribute/deleteserver1
+    $ ${delete} ${server_url}/attribute/deleteserver1/group/owner
     []
     HTTP: 200
     Content-type: application/json
 
 Will create a ``basicserver`` object called ``deleteserver1``, then it will
 add an attribute (the only attribute so far), then it will delete it.
+
+.. code:: bash
+
+    $ ${post} -d 'name=deleteserver2' ${server_url}/entity/basicserver
+    [
+        "/basicserver/deleteserver2"
+    ]
+    HTTP: 201
+    Content-type: application/json
+
+.. code:: bash
+
+    $ ${put} -d 'value=engineering' ${server_url}/attribute/deleteserver2/group
+    [
+        {
+            "datatype": "string",
+            "key": "group",
+            "number": null,
+            "subkey": null,
+            "value": "engineering"
+        }
+    ]
+    HTTP: 200
+    Content-type: application/json
+
+.. code:: bash
+
+    $ ${put} -d 'value=joe' ${server_url}/attribute/deleteserver2/group/owner
+    [
+        {
+            "datatype": "string",
+            "key": "group",
+            "number": null,
+            "subkey": null,
+            "value": "engineering"
+        },
+        {
+            "datatype": "string",
+            "key": "group",
+            "number": null,
+            "subkey": "owner",
+            "value": "joe"
+        }
+    ]
+    HTTP: 200
+    Content-type: application/json
+
+.. code:: bash
+
+    $ ${delete} ${server_url}/attribute/deleteserver2/group/owner
+    [
+        {
+            "datatype": "string",
+            "key": "group",
+            "number": null,
+            "subkey": null,
+            "value": "engineering"
+        }
+    ]
+    HTTP: 200
+    Content-type: application/json
+
+This example should add two attributes with the same key, but different
+subkey, then it will delete only the second value.
 """
 
     kwargs = dict(request.params.items())
+    driver = kwargs.get('driver', None)
     obj, status, msg = util.object(name, driver)
     if not obj:
         return util.dumps(msg, status)
-    if 'key' not in kwargs.keys():
-        bottle.abort(412, 'Provide at least "key" and "value"')
-    if 'number' in kwargs:
-        kwargs['number'] = int(kwargs['number'])
-    obj.del_attrs(**kwargs)
+    qkwargs = {'key': key}
+    if subkey:
+        qkwargs['subkey'] = subkey
+    if number:
+        qkwargs['number'] = number
+    obj.del_attrs(**qkwargs)
     return util.dumps([util.unclusto(_) for _ in obj.attrs()])
