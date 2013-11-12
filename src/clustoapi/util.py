@@ -9,7 +9,7 @@ import clusto
 import json
 
 
-def object(name, driver=None):
+def get(name, driver=None):
     """
 Tries to fetch a clusto object from a given name, optionally validating
 the driver given. Returns:

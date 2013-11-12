@@ -84,7 +84,7 @@ Will show the attributes for ``server1`` if their key is ``owner``.
     attrs = []
     kwargs = dict(request.params.items())
     driver = kwargs.get('driver', None)
-    obj, status, msg = util.object(name, driver)
+    obj, status, msg = util.get(name, driver)
     if not obj:
         return util.dumps(msg, status)
 
@@ -170,7 +170,7 @@ value ``joe`` to the previously created entity ``addattrserver``
 
     kwargs = dict(request.params.items())
     driver = kwargs.get('driver', None)
-    obj, status, msg = util.object(name, driver)
+    obj, status, msg = util.get(name, driver)
     if not obj:
         return util.dumps(msg, status)
 
@@ -296,7 +296,7 @@ Will:
 """
 
     kwargs = dict(request.params.items())
-    obj, status, msg = util.object(name)
+    obj, status, msg = util.get(name)
     if not obj:
         return util.dumps(msg, status)
     if 'value' not in kwargs.keys():
@@ -418,7 +418,7 @@ subkey, then it will delete only the second value.
 
     kwargs = dict(request.params.items())
     driver = kwargs.get('driver', None)
-    obj, status, msg = util.object(name, driver)
+    obj, status, msg = util.get(name, driver)
     if not obj:
         return util.dumps(msg, status)
     qkwargs = {'key': key}

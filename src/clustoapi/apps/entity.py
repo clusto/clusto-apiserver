@@ -280,7 +280,7 @@ Will return a JSON representation of the previously created ``showpool``.
 
 """
 
-    obj, status, msg = util.object(name, driver)
+    obj, status, msg = util.get(name, driver)
     if not obj:
         return util.dumps(msg, status)
 
@@ -378,7 +378,7 @@ The above will:
 
 """
 
-    obj, status, msg = util.object(name, driver)
+    obj, status, msg = util.get(name, driver)
     if not obj:
         return util.dumps(msg, status)
     devices = request.params.getall('device')
