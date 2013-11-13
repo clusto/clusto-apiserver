@@ -22,19 +22,23 @@ the driver given. Returns:
     status = None
     obj = None
     msg = None
-    try:
-        if driver:
-            obj = clusto.get_by_name(name, assert_driver=clusto.driverlist[driver])
-        else:
-            obj = clusto.get_by_name(name)
+    if driver and driver not in clusto.driverlist:
+        status = 412
+        msg = u'The driver "%s" is not a valid driver' % (driver,)
+    else:
+        try:
+            if driver:
+                obj = clusto.get_by_name(name, assert_driver=clusto.driverlist[driver])
+            else:
+                obj = clusto.get_by_name(name)
 
-    except LookupError:
-        status = 404
-        msg = 'Object "%s" not found' % (name,)
+        except LookupError as le:
+            status = 404
+            msg = u'Object "%s" not found (%s)' % (name, str(le),)
 
-    except TypeError:
-        status = 409
-        msg = 'The driver for object "%s" is not "%s"' % (name, driver,)
+        except TypeError:
+            status = 409
+            msg = u'The driver for object "%s" is not "%s"' % (name, driver,)
 
     return obj, status, msg
 
