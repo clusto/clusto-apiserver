@@ -5,6 +5,7 @@
 #
 
 import bottle
+import clusto
 import clustoapi
 from clustoapi import apps as api_apps
 import inspect
@@ -60,7 +61,13 @@ class TestingServer(threading.Thread):
                 'apps': get_mount_apps(),
                 'server': self.server,
             },
-            configfile=conffile
+            configfile=conffile,
+            init_data={
+                'testpool1': clusto.drivers.pool.Pool,
+                'testpool2': clusto.drivers.pool.Pool,
+                'testserver1': clusto.drivers.servers.BasicServer,
+                'testserver2': clusto.drivers.servers.BasicServer,
+            }
         )
         mount_apps = {}
 
@@ -108,30 +115,6 @@ Return all apps as mountable apps for the main server.
         mount_apps['/%s' % (app,)] = mod
 
     return mount_apps
-
-
-def start_testing_web_server(port):
-    """
-Start a testing web server in a non-blocking thread.
-    """
-
-    conffile = config_for_testing()
-    bottle_kwargs = clustoapi.server._configure(
-        config={
-            'quiet': True,
-            'port': port,
-            'debug': False,
-            'apps': get_mount_apps(),
-        },
-        configfile=conffile
-    )
-
-    bottle = clustoapi.server.root_app
-
-    # Start this server in a thread so it doesn't block
-    thread = threading.Thread(target=bottle.run, kwargs=bottle_kwargs)
-    thread.daemon = True
-    thread.start()
 
 
 def ping(port):
