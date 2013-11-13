@@ -38,6 +38,7 @@ import inspect
 import os
 import string
 import sys
+import util
 
 
 DOC_SUBSTITUTIONS = {
@@ -164,9 +165,7 @@ the plain text version back
     HTTP: 200
     Content-type: text/plain
 
-.. code:: bash
-
-    $ diff -q <( curl -s -H 'Accept: text/plain' ${server_url}/__doc__ ) <( curl -s -H 'Accept: text/plain' ${server_url}/ ) && echo equal || echo diff
+    $ diff -q <( curl -s -H 'Accept: text/plain' ${server_url}/__doc__ ) <( curl -s -H 'Accept: text/plain' ${server_url}/ ) && echo 'equal' || echo 'diff'
     equal
 
 """
@@ -222,7 +221,110 @@ the plain text version back
         return text
 
 
-def _configure(config={}, configfile=None):
+@root_app.get('/from-pools')
+def get_from_pools():
+    """
+One of the main ``clusto`` operations. Parameters:
+
+* Required: at least one ``pool`` parameter
+* Optional: one or more ``driver`` parameter to filter out results
+* Optional: one or more ``type`` parameter to filter out results
+* Optional: a boolean ``children`` parameter to search for children
+  recursively (True by default)
+
+Examples:
+
+.. code:: bash
+
+    $ ${get} ${server_url}/from-pools
+    "Provide at least one pool to get data from"
+    HTTP: 412
+    Content-type: application/json
+
+    $ ${get} -d 'pool=testpool1' ${server_url}/from-pools
+    []
+    HTTP: 200
+    Content-type: application/json
+
+    $ ${get} -d 'pool=testpool1' -d 'pool=testpool2' ${server_url}/from-pools
+    []
+    HTTP: 200
+    Content-type: application/json
+
+"""
+
+    pools = bottle.request.params.getall('pool')
+    if not pools:
+        return util.dumps('Provide at least one pool to get data from', 412)
+    types = bottle.request.params.getall('type')
+    drivers = bottle.request.params.getall('driver')
+    children = bottle.request.params.get('children', default=True, type=bool)
+
+    try:
+        ents = clusto.get_from_pools(
+            pools, clusto_types=types, clusto_drivers=drivers, search_children=children
+        )
+        results = []
+        for ent in ents:
+            results.append(util.unclusto(ent))
+        return util.dumps(results)
+    except TypeError as te:
+        return util.dumps('%s' % (te,), 409)
+    except LookupError as le:
+        return util.dumps('%s' % (le,), 404)
+    except Exception as e:
+        return util.dumps('%s' % (e,), 500)
+
+
+@root_app.get('/by-name/<name>')
+def get_by_name(name):
+    """
+One of the main ``clusto`` operations. Parameters:
+
+* Required path parameter: ``name`` - The name you're looking for
+* Optional: ``driver`` - If provided, a driver check will be added to
+  ensure the resulting object is the type you're expecting
+
+Examples:
+
+.. code:: bash
+
+    $ ${get} ${server_url}/by-name/nonserver
+    "Object \"nonserver\" not found (nonserver does not exist.)"
+    HTTP: 404
+    Content-type: application/json
+
+    $ ${get} ${server_url}/by-name/testserver1
+    {
+        "attrs": [],
+        "contents": [],
+        "driver": "basicserver",
+        "name": "testserver1",
+        "parents": []
+    }
+    HTTP: 200
+    Content-type: application/json
+
+    $ ${get} -d 'driver=pool' ${server_url}/by-name/testserver1
+    "The driver for object \"testserver1\" is not \"pool\""
+    HTTP: 409
+    Content-type: application/json
+
+    $ ${get} -d 'driver=nondriver' ${server_url}/by-name/testserver1
+    "The driver \"nondriver\" is not a valid driver"
+    HTTP: 412
+    Content-type: application/json
+
+"""
+
+    driver = bottle.request.params.get('driver', default=None)
+    obj, status, msg = util.get(name, driver)
+    if not obj:
+        return util.dumps(msg, status)
+    return util.dumps(util.show(obj))
+
+
+def _configure(config={}, configfile=None, init_data={}):
     """
 Configure the root app
 """
@@ -238,6 +340,10 @@ Configure the root app
     clusto.connect(cfg)
 #   This is an idempotent operation
     clusto.init_clusto()
+#   If init_data is provided, populate it in the clusto database
+    if init_data:
+        for name, cls in init_data.items():
+            clusto.get_or_create(name, cls)
     kwargs = {}
     kwargs['host'] = config.get(
         'host',
