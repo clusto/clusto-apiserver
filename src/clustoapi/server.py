@@ -391,7 +391,7 @@ Configure the root app
     root_app.route('/__doc__', 'GET', functools.partial(build_docs, '/', __name__))
     for mount_point, cls in mount_apps.items():
         module = __import__(cls, fromlist=[cls])
-        root_app.mount(mount_point, module.bottle_app)
+        root_app.mount(mount_point, module.app)
         path = '%s/__doc__' % (mount_point,)
         root_app.route(path, 'GET', functools.partial(build_docs, path, cls))
 

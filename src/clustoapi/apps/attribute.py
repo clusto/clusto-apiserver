@@ -17,14 +17,14 @@ from bottle import request
 from clustoapi import util
 
 
-bottle_app = bottle.Bottle()
-bottle_app.config['source_module'] = __name__
+app = bottle.Bottle()
+app.config['source_module'] = __name__
 
 
-@bottle_app.get('/<name>')
-@bottle_app.get('/<name>/<key>')
-@bottle_app.get('/<name>/<key>/<subkey>')
-@bottle_app.get('/<name>/<key>/<subkey>/<number:int>')
+@app.get('/<name>')
+@app.get('/<name>/<key>')
+@app.get('/<name>/<key>/<subkey>')
+@app.get('/<name>/<key>/<subkey>/<number:int>')
 def attrs(name, key=None, subkey=None, number=None):
     """
 Query attributes from this object.
@@ -100,7 +100,7 @@ Will show the attributes for ``server1`` if their key is ``owner``.
     return util.dumps(attrs)
 
 
-@bottle_app.post('/<name>')
+@app.post('/<name>')
 def add_attr(name):
     """
 Add an attribute to this object.
@@ -186,9 +186,9 @@ value ``joe`` to the previously created entity ``addattrserver``
     return util.dumps([util.unclusto(_) for _ in obj.attrs()], 201)
 
 
-@bottle_app.put('/<name>/<key>')
-@bottle_app.put('/<name>/<key>/<subkey>')
-@bottle_app.put('/<name>/<key>/<subkey>/<number:int>')
+@app.put('/<name>/<key>')
+@app.put('/<name>/<key>/<subkey>')
+@app.put('/<name>/<key>/<subkey>/<number:int>')
 def set_attr(name, key, subkey=None, number=None):
     """
 Sets an attribute from this object. If the attribute doesn't exist
@@ -305,9 +305,9 @@ Will:
     return util.dumps([util.unclusto(_) for _ in obj.attrs()])
 
 
-@bottle_app.delete('/<name>/<key>')
-@bottle_app.delete('/<name>/<key>/<subkey>')
-@bottle_app.delete('/<name>/<key>/<subkey>/<number:int>')
+@app.delete('/<name>/<key>')
+@app.delete('/<name>/<key>/<subkey>')
+@app.delete('/<name>/<key>/<subkey>/<number:int>')
 def del_attrs(name, key, subkey=None, number=None):
     """
 Deletes an attribute from this object

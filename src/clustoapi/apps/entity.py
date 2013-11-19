@@ -19,12 +19,12 @@ import clusto
 from clustoapi import util
 
 
-bottle_app = bottle.Bottle(autojson=False)
-bottle_app.config['source_module'] = __name__
+app = bottle.Bottle(autojson=False)
+app.config['source_module'] = __name__
 
 
-@bottle_app.get('/')
-@bottle_app.get('/<driver>')
+@app.get('/')
+@app.get('/<driver>')
 def get_entities(driver=None):
     """
 Returns all entities, or (optionally) all entities of the given driver
@@ -92,7 +92,7 @@ The following example should fail because there is no driver ``nondriver``:
     return util.dumps(result)
 
 
-@bottle_app.post('/<driver>')
+@app.post('/<driver>')
 def create(driver):
     """
 Creates a new object of the given driver.
@@ -181,7 +181,7 @@ an extra header ``Warnings`` with the message.
     return util.dumps(result, code, headers=headers)
 
 
-@bottle_app.delete('/<driver>')
+@app.delete('/<driver>')
 def delete(driver):
     """
 Deletes an object if it matches the given driver
@@ -247,7 +247,7 @@ if the object doesn't exist, it will return a 404.
     return bottle.HTTPResponse('', code, headers={'content_type': None})
 
 
-@bottle_app.get('/<driver>/<name>')
+@app.get('/<driver>/<name>')
 def show(driver, name):
     """
 Returns a json representation of the given object
@@ -287,7 +287,7 @@ Will return a JSON representation of the previously created ``showpool``.
     return util.dumps(util.show(obj))
 
 
-@bottle_app.put('/<driver>/<name>')
+@app.put('/<driver>/<name>')
 def insert(driver, name):
     """
 Inserts the given device from the request parameters into the object
