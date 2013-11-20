@@ -7,6 +7,8 @@
 import setuptools
 import sys
 
+import clustoapi
+
 
 install_requires = [
     'distribute',
@@ -42,8 +44,8 @@ if 'install' not in args:
 
 setuptools.setup(
     name='clusto-apiserver',
-    version='0.1.0',
-    packages=setuptools.find_packages('src'),
+    version=clustoapi.__version__,
+    packages=setuptools.find_packages(),
     author='Jorge Gallegos',
     author_email='kad@blegh.net',
     description='A clusto API server',
@@ -58,8 +60,5 @@ setuptools.setup(
         ],
     },
     zip_safe=False,
-    package_dir={
-        '': 'src'
-    },
     test_suite='tests.all.test_suites',
 )
