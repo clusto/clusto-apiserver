@@ -181,8 +181,8 @@ an extra header ``Warnings`` with the message.
     return util.dumps(result, code, headers=headers)
 
 
-@app.delete('/<driver>')
-def delete(driver):
+@app.delete('/<driver>/<name>')
+def delete(driver, name):
     """
 Deletes an object if it matches the given driver
 
@@ -201,20 +201,20 @@ Examples:
 
 .. code:: bash
 
-    $ ${delete} -d 'name=servercreated' ${server_url}/entity/nondriver
+    $ ${delete} ${server_url}/entity/nondriver/servercreated
     "Requested driver \"nondriver\" does not exist"
     HTTP: 409
     Content-type: application/json
 
 .. code:: bash
 
-    $ ${delete} -d 'name=servercreated' ${server_url}/entity/basicserver
+    $ ${delete} ${server_url}/entity/basicserver/servercreated
     HTTP: 204
     Content-type:
 
 .. code:: bash
 
-    $ ${delete} -d 'name=servercreated' ${server_url}/entity/basicserver
+    $ ${delete} ${server_url}/entity/basicserver/servercreated
     HTTP: 404
     Content-type: text/html; charset=UTF-8
 
@@ -227,24 +227,20 @@ if the object doesn't exist, it will return a 404.
     if driver not in clusto.driverlist:
         return util.dumps('Requested driver "%s" does not exist' % (driver,), 409)
 
-    names = request.params.getall('name')
+    notfound = None
 
-    notfound = []
-    objs = []
-    for name in names:
-        try:
-            objs.append(clusto.get_by_name(name))
-        except LookupError:
-            notfound.append(name)
+    try:
+        obj = clusto.get_by_name(name)
+    except LookupError:
+        notfound = name
 
     code = 204
     if notfound:
         code = 404
     else:
-        for obj in objs:
-            obj.entity.delete()
+        obj.entity.delete()
 
-    return bottle.HTTPResponse('', code, headers={'content_type': None})
+    return bottle.HTTPResponse('', code, headers={'Content-type': None})
 
 
 @app.get('/<driver>/<name>')
