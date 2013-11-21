@@ -18,7 +18,6 @@ from wsgiref import simple_server
 
 TOP_DIR = os.path.realpath('%s/../../' % (os.path.dirname(os.path.realpath(__file__)),))
 TEST_DIR = os.path.realpath('%s/../' % (os.path.dirname(os.path.realpath(__file__)),))
-SRC_DIR = os.path.join(TOP_DIR, 'src')
 
 
 class TestingWSGIServer(bottle.ServerAdapter):
@@ -156,10 +155,10 @@ def get_source_filenames():
 Get all python files so they can be tested.
     """
 
-    filenames = [os.path.join(SRC_DIR, 'clustoapi', 'server.py')]
+    filenames = [os.path.join(TOP_DIR, 'clustoapi', 'server.py')]
     for walkable in ('apps',):
         for root, dirs, files in os.walk(
-            os.path.join(SRC_DIR, 'clustoapi', walkable)
+            os.path.join(TOP_DIR, 'clustoapi', walkable)
         ):
             for f in files:
                 filename = os.path.join(root, f)

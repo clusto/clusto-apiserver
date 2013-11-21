@@ -35,7 +35,7 @@ class PEP8Test(unittest.TestCase):
 
 def test_cases():
     filenames = {}
-    for walkable in (util.SRC_DIR, util.TEST_DIR,):
+    for walkable in (util.TOP_DIR, util.TEST_DIR,):
         for root, dirs, files in os.walk(walkable):
             for f in files:
                 filename = os.path.join(root, f)
