@@ -342,8 +342,8 @@ Configure the root app
     clusto.init_clusto()
 #   If init_data is provided, populate it in the clusto database
     if init_data:
-        for name, cls in init_data.items():
-            clusto.get_or_create(name, cls)
+        for name, data in init_data.items():
+            clusto.get_or_create(name, data['driver'], **data.get('attrs', {}))
     kwargs = {}
     kwargs['host'] = config.get(
         'host',
