@@ -25,7 +25,7 @@ app.config['source_module'] = __name__
 
 @app.get('/')
 @app.get('/<driver>')
-def get_entities(driver=None):
+def list(driver=None):
     """
 Returns all entities, or (optionally) all entities of the given driver
 
