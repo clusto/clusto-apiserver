@@ -67,9 +67,9 @@ class TestingServer(threading.Thread):
                 'testserver1': {'driver': clusto.drivers.servers.BasicServer},
                 'testserver2': {'driver': clusto.drivers.servers.BasicServer},
                 'testnames': {
-                    'driver': clusto.drivers.resourcemanagers.SimpleNameManager,
+                    'driver': clusto.drivers.resourcemanagers.SimpleEntityNameManager,
                     'attrs': {'basename': 's'},
-                }
+                },
             }
         )
         mount_apps = {}
