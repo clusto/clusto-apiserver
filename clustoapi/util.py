@@ -88,5 +88,7 @@ def show(obj):
     result['attrs'] = attrs
     result['contents'] = [unclusto(x) for x in obj.contents()]
     result['parents'] = [unclusto(x) for x in obj.parents()]
+    if isinstance(obj, clusto.drivers.resourcemanagers.ResourceManager):
+        result['count'] = obj.count
 
     return result
