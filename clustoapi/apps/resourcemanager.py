@@ -168,7 +168,7 @@ additional arguments such as ``netmask``, ``gateway`` and ``baseip``
 
 """
     if driver not in clusto.driverlist:
-        return util.dumps('Requested driver "%s" does not exist' % (driver,), 409)
+        return util.dumps('Requested driver "%s" does not exist' % (driver,), 412)
     cls = clusto.driverlist[driver]
     name = request.params.get('name')
     request.params.pop('name')
@@ -205,14 +205,36 @@ Examples:
 
 .. code:: bash
 
-    $ ${get} ${server_url}/resourcemanager/simpleentitynamemanager/testnames
+    $ ${post} -d 'name=nameman2' ${server_url}/resourcemanager/simplenamemanager
     {
-        ...
+        "attrs": [
+            ...
+        ],
+        "contents": [],
+        "count": 0,
+        "driver": "simplenamemanager",
+        "name": "nameman2",
+        "parents": []
+    }
+    HTTP: 201
+    Content-type: application/json
+
+    $ ${get} ${server_url}/resourcemanager/simplenamemanager/nameman1
+    {
+        "attrs": [
+            ...
+        ],
+        "contents": [],
+        "count": 0,
+        "driver": "simplenamemanager",
+        "name": "nameman1",
+        "parents": []
     }
     HTTP: 200
     Content-type: application/json
 
-Will return the ``testnames`` resource manager and its details
+Will create the ``nameman2`` resource manager, then show its details. In this
+case both operations yield the same data.
 
 .. code:: bash
 
@@ -239,7 +261,7 @@ Will return a ``412`` because the driver ``nomanager`` doesn't exist
     HTTP: 409
     Content-type: application/json
 
-Will return a ``409`` instead because even though the driver ``basicserver``
+Will return a ``412`` instead because even though the driver ``basicserver``
 exists, it is not a resource manager driver
 """
 
@@ -274,8 +296,7 @@ Examples:
     Content-type: application/json
 
 Will request a new name from the object ``testnames`` (which is an object
-of ``drivers.resourcemanagers.simplenamemanager.SimpleEntityManager``) and then
-it will create a new ``drivers.devices.servers.basicserver.BasicServer``
+of ``SimpleEntityManager``) and then it will create a new ``BasicServer``
 object.
 
 .. code:: bash
@@ -291,13 +312,10 @@ object.
     HTTP: 201
     Content-type: application/json
 
-Will create a new ``drivers.devices.servers.basicserver.BasicServer`` object
-from the ``testnames`` resource manager with the specific name of ``s99``
+Will create a new ``BasicServer`` object from the ``testnames`` resource
+manager with the specific name of ``s99``.
 """
 
-    drv = clusto.driverlist.get(driver)
-    if not drv:
-        return util.dumps('Driver incorrect or not found: %s' % (driver,), 409)
     obj, status, msg = _get_resource_manager(manager, driver)
     if not obj:
         return util.dumps(msg, status)
@@ -318,4 +336,12 @@ from the ``testnames`` resource manager with the specific name of ``s99``
             return util.dumps('Thing was "%s" not found' % (d or o,), 404)
         resource = request.params.get('resource', default=())
         r = obj.allocate(thing, resource)
-        return util.dumps(util.show(r), 201)
+#       The returned value can be anything such a string, number, or attribute
+        return util.dumps(util.unclusto(r), 201)
+
+
+@app.delete('/<driver>/<manager>')
+def deallocate(driver, manager):
+    """
+"""
+    pass

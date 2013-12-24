@@ -61,7 +61,7 @@ The following example should fail because there is no driver ``nondriver``:
 
     $ ${get} ${server_url}/entity/nondriver
     "The requested driver \"nondriver\" does not exist"
-    HTTP: 409
+    HTTP: 412
     Content-type: application/json
 
 """
@@ -74,7 +74,7 @@ The following example should fail because there is no driver ``nondriver``:
         if driver in clusto.driverlist:
             kwargs['clusto_drivers'] = [clusto.driverlist[driver]]
         else:
-            return util.dumps('The requested driver "%s" does not exist' % (driver,), 409)
+            return util.dumps('The requested driver "%s" does not exist' % (driver,), 412)
     ents = clusto.get_entities(**kwargs)
     for ent in ents:
         result.append(util.unclusto(ent))
@@ -125,13 +125,13 @@ and you will see whatever warnings in the ``Warnings`` header:
     ]
 
 If you try to create a server of an unknown driver, you should receive
-a 409 status code back:
+a 412 status code back:
 
 .. code:: bash
 
     $ ${post} -d 'name=createobject' ${server_url}/entity/nondriver
     "Requested driver \"nondriver\" does not exist"
-    HTTP: 409
+    HTTP: 412
     Content-type: application/json
 
 The following example:
@@ -155,7 +155,7 @@ an extra header ``Warnings`` with the message.
 """
 
     if driver not in clusto.driverlist:
-        return util.dumps('Requested driver "%s" does not exist' % (driver,), 409)
+        return util.dumps('Requested driver "%s" does not exist' % (driver,), 412)
     cls = clusto.driverlist[driver]
     names = request.params.getall('name')
     request.params.pop('name')
@@ -203,7 +203,7 @@ Examples:
 
     $ ${delete} ${server_url}/entity/nondriver/servercreated
     "Requested driver \"nondriver\" does not exist"
-    HTTP: 409
+    HTTP: 412
     Content-type: application/json
 
 .. code:: bash
@@ -225,7 +225,7 @@ if the object doesn't exist, it will return a 404.
 """
 
     if driver not in clusto.driverlist:
-        return util.dumps('Requested driver "%s" does not exist' % (driver,), 409)
+        return util.dumps('Requested driver "%s" does not exist' % (driver,), 412)
 
     notfound = None
 
@@ -274,6 +274,15 @@ Example:
 
 Will return a JSON representation of the previously created ``showpool``.
 
+.. code:: bash
+
+    $ ${get} ${server_url}/entity/basicserver/showpool
+    "The driver for object \"showpool\" is not \"basicserver\""
+    HTTP: 409
+    Content-type: application/json
+
+Will yield a 409 (Conflict) because the object ``showpool`` is not a
+``basicserver`` object.
 """
 
     obj, status, msg = util.get(name, driver)
