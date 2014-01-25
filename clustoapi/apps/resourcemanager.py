@@ -3,6 +3,7 @@
 # -*- mode:python; sh-basic-offset:4; indent-tabs-mode:nil; coding:utf-8 -*-
 # vim:set tabstop=4 softtabstop=4 expandtab shiftwidth=4 fileencoding=utf-8:
 #
+# Copyright 2013, Jorge Gallegos <kad@blegh.net>
 
 """
 The ``resourcemanager`` application will hold all methods related to resource
@@ -88,7 +89,8 @@ Will return a ``404`` error because that resource manager driver doesn't exist
                 'Not a valid driver "%s" (%s)' % (driver, ne,), 404
             )
     else:
-        ents = clusto.get_entities(clusto_types=['resourcemanager'])
+#       Until we fix the ipmanager snafu, gotta check for both types
+        ents = clusto.get_entities(clusto_types=['resourcemanager', 'ipmanager'])
 
     for ent in ents:
 #       Kind of shitty way, but have to make sure these are all resource managers
@@ -284,31 +286,33 @@ Examples:
 
 .. code:: bash
 
-    $ ${post} -d 'driver=basicserver' ${server_url}/resourcemanager/simpleentitynamemanager/testnames
+    $ ${post} -d 'name=allocator' ${server_url}/resourcemanager/simpleentitynamemanager
     {
-        "attrs": [],
+        "attrs": [
+            ...
+        ],
         "contents": [],
-        "driver": "basicserver",
-        "name": ...
+        "count": 0,
+        "driver": "simpleentitynamemanager",
+        "name": "allocator",
         "parents": []
     }
     HTTP: 201
     Content-type: application/json
 
-Will request a new name from the object ``testnames`` (which is an object
-of ``SimpleEntityManager``) and then it will create a new ``BasicServer``
-object.
+    $ ${post} -d 'driver=basicserver' ${server_url}/resourcemanager/simpleentitynamemanager/allocator
+    "/basicserver/01"
+    HTTP: 201
+    Content-type: application/json
+
+Will request a new name from the object ``allocator`` (which is an object
+of ``SimpleEntityManager`` that we just created with default values) and then
+it will create a new ``BasicServer`` object.
 
 .. code:: bash
 
-    $ ${post} -d 'driver=basicserver' -d 'resource=s99' ${server_url}/resourcemanager/simpleentitynamemanager/testnames
-    {
-        "attrs": [],
-        "contents": [],
-        "driver": "basicserver",
-        "name": "s99",
-        "parents": []
-    }
+    $ ${post} -d 'driver=basicserver' -d 'resource=99' ${server_url}/resourcemanager/simpleentitynamemanager/allocator
+    "/basicserver/99"
     HTTP: 201
     Content-type: application/json
 
@@ -343,5 +347,95 @@ manager with the specific name of ``s99``.
 @app.delete('/<driver>/<manager>')
 def deallocate(driver, manager):
     """
+Resource managers should allow you to deallocate *things* just the same
+as allocating *things*.
+
+Examples:
+
+.. code:: bash
+
+    $ ${post} -d 'name=ipman2' -d 'gateway=192.168.1.1' -d 'netmask=255.255.255.0' -d 'baseip=192.168.1.10' ${server_url}/resourcemanager/ipmanager
+    {
+        "attrs": [
+            {
+                "datatype": "string",
+                "key": "baseip",
+                "number": null,
+                "subkey": "property",
+                "value": "192.168.1.10"
+            },
+            {
+                "datatype": "string",
+                "key": "gateway",
+                "number": null,
+                "subkey": "property",
+                "value": "192.168.1.1"
+            },
+            {
+                "datatype": "string",
+                "key": "netmask",
+                "number": null,
+                "subkey": "property",
+                "value": "255.255.255.0"
+            }
+        ],
+        "contents": [],
+        "count": 0,
+        "driver": "ipmanager",
+        "name": "ipman2",
+        "parents": []
+    }
+    HTTP: 201
+    Content-type: application/json
+
+    $ ${post} -d 'name=names2' -d 'basename=a' ${server_url}/resourcemanager/simpleentitynamemanager
+    {
+        "attrs": [
+            ...
+        ],
+        "contents": [],
+        "count": 0,
+        "driver": "simpleentitynamemanager",
+        "name": "names2",
+        "parents": []
+    }
+    HTTP: 201
+    Content-type: application/json
+
+    $ ${post} -d 'driver=basicserver' ${server_url}/resourcemanager/simpleentitynamemanager/names2
+    "/basicserver/a01"
+    HTTP: 201
+    Content-type: application/json
+
+    $ ${post} -d 'object=a01' ${server_url}/resourcemanager/ipmanager/ipman2
+    {
+        "datatype": "int",
+        "key": "ip",
+        "number": 0,
+        "subkey": null,
+        "value": 1084752130
+    }
+    HTTP: 201
+    Content-type: application/json
+
+    $ ${delete} -d 'object=a01' ${server_url}/resourcemanager/ipmanager/ipman2
+    HTTP: 204
+    Content-type:
+
 """
-    pass
+
+    resman, status, msg = _get_resource_manager(manager, driver)
+    if not resman:
+        return util.dumps(msg, status)
+    else:
+        obj = request.params.get('object')
+        if not obj:
+            return util.dumps(
+                'Cannot deallocate empty, send an object to deallocate',
+                404
+            )
+        obj, status, msg = util.get(obj)
+        resource = request.params.get('resource', ())
+#       Attempt to deallocate
+        resman.deallocate(obj, resource=resource)
+        return util.dumps(util.unclusto(resman), 204)
