@@ -86,7 +86,7 @@ Send an HTTP code to clients so they stop asking for favicon. Example:
 
 @root_app.route('/', method='HEAD')
 @root_app.get('/__version__')
-def show_version():
+def version():
     """
 This shows the current version running, example
 
