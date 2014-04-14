@@ -11,7 +11,6 @@ import clustoapi
 
 
 install_requires = [
-    'distribute',
     'clusto>0.6',
     'bottle',
 ]
