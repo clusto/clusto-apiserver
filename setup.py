@@ -49,9 +49,6 @@ setuptools.setup(
     author_email='kad@blegh.net',
     description='A clusto API server',
     license='BSD',
-    setup_requires=[
-        'distribute',
-    ],
     install_requires=install_requires,
     entry_points={
         'console_scripts': [
