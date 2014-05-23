@@ -216,7 +216,7 @@ Examples:
 
     $ ${delete} ${server_url}/entity/basicserver/servercreated
     HTTP: 404
-    Content-type: text/html; charset=UTF-8
+    Content-type: None
 
 Will create a new ``servercreated`` object with a ``basicserver`` driver. Then
 it will proceed to delete it. If the operation succeeded, it will return a 200,
