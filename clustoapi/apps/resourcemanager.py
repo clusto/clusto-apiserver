@@ -89,11 +89,11 @@ Will return a ``404`` error because that resource manager driver doesn't exist
                 'Not a valid driver "%s" (%s)' % (driver, ne,), 404
             )
     else:
-#       Until we fix the ipmanager snafu, gotta check for both types
+        # Until we fix the ipmanager snafu, gotta check for both types
         ents = clusto.get_entities(clusto_types=['resourcemanager', 'ipmanager'])
 
     for ent in ents:
-#       Kind of shitty way, but have to make sure these are all resource managers
+        # Kind of shitty way, but have to make sure these are all resource managers
         if issubclass(ent.__class__, drivers.resourcemanagers.ResourceManager):
             result.append(util.unclusto(ent))
     return util.dumps(result)
