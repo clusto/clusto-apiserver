@@ -15,6 +15,13 @@ install_requires = [
     'bottle',
 ]
 
+# These two were introduced in 2.7
+if sys.version_info < (2, 7):
+    install_requires.extend([
+        'importlib',
+        'argparse'
+    ])
+
 # only required when you are doing testing
 test_requires = [
     'shelldoctest',
