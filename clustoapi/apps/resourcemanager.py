@@ -40,6 +40,7 @@ def _get_resource_manager(manager, driver):
 
 @app.get('/')
 @app.get('/<driver>')
+@app.get('/<driver>/')
 def list(driver=None):
     """
 Lists all resource managers found in the clusto database. Optionally you can
@@ -90,7 +91,7 @@ Will return a ``404`` error because that resource manager driver doesn't exist
             )
     else:
         # Until we fix the ipmanager snafu, gotta check for both types
-        ents = clusto.get_entities(clusto_types=['resourcemanager', 'ipmanager'])
+        ents = clusto.get_entities(clusto_types=['resourcemanager'])
 
     for ent in ents:
         # Kind of shitty way, but have to make sure these are all resource managers
@@ -199,6 +200,7 @@ additional arguments such as ``netmask``, ``gateway`` and ``baseip``
 
 
 @app.get('/<driver>/<manager>')
+@app.get('/<driver>/<manager>/')
 def show(driver, manager):
     """
 Shows the details of the given resource manager, if it is a resource manager

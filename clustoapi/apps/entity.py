@@ -25,6 +25,7 @@ app.config['source_module'] = __name__
 
 @app.get('/')
 @app.get('/<driver>')
+@app.get('/<driver>/')
 def list(driver=None):
     """
 Returns all entities, or (optionally) all entities of the given driver
@@ -244,6 +245,7 @@ if the object doesn't exist, it will return a 404.
 
 
 @app.get('/<driver>/<name>')
+@app.get('/<driver>/<name>/')
 def show(driver, name):
     """
 Returns a json representation of the given object

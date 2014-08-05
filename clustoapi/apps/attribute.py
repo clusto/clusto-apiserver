@@ -22,9 +22,12 @@ app.config['source_module'] = __name__
 
 
 @app.get('/<name>')
+@app.get('/<name>/')
 @app.get('/<name>/<key>')
+@app.get('/<name>/<key>/')
 @app.get('/<name>/<key>/<subkey>')
 @app.get('/<name>/<key>/<subkey>/<number:int>')
+@app.get('/<name>/<key>/<subkey>/<number:int>/')
 def attrs(name, key=None, subkey=None, number=None):
     """
 Query attributes from this object.
