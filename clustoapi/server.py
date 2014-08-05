@@ -185,7 +185,7 @@ the plain text version back
             docs.append('\nMounted Applications\n%s\n' % ('-' * 20, ))
             for k, v in mods.items():
                 docs.append(
-                    '\n * `%s <${server_url}%s/__doc__>`_\n' % (v, k,)
+                    '\n * `%s <${server_url}/__doc__%s>`_\n' % (v, k,)
                 )
 
     docs.append('\nModule methods\n%s\n' % ('-' * 32,))
@@ -392,7 +392,7 @@ Configure the root app
     root_app.route('/__doc__', 'GET', functools.partial(build_docs, '/', __name__))
     for mount_point, cls in mount_apps.items():
         module = importlib.import_module(cls)
-        path = '%s/__doc__' % (mount_point,)
+        path = '/__doc__%s' % (mount_point,)
         root_app.route(path, 'GET', functools.partial(build_docs, path, cls))
         root_app.mount(mount_point, module.app)
 
