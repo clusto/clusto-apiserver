@@ -34,6 +34,7 @@ develop_requires = test_requires
 develop_requires.extend([
     'docutils',
     'Pygments',
+    'sphinx',
 ])
 
 args = sys.argv[1:]
