@@ -8,3 +8,4 @@ build
 *.egg
 tests/clustotest.conf
 tests/clustotest.db
+docs/_build
