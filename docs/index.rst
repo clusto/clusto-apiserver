@@ -1,15 +1,17 @@
-Clusto API Server's documentation
-=================================
+Clusto API Server
+=================
 
-.. include:: README.rst
+About
+-----
 
-Contents:
+.. include:: ../README.rst
+
 
 .. toctree::
    :maxdepth: 2
+   :glob:
 
-.. automodule:: clustoapi.server
-   :members:
+   clustoapi/*
 
 
 Indices and tables

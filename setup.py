@@ -4,11 +4,14 @@
 # vim:set tabstop=4 softtabstop=4 expandtab shiftwidth=4 fileencoding=utf-8:
 #
 
+import os
 import setuptools
 import sys
 
 import clustoapi
 
+
+readme = os.path.join(os.path.dirname(sys.argv[0]), 'README.rst')
 
 install_requires = [
     'clusto>0.6',
@@ -57,6 +60,7 @@ setuptools.setup(
     author=clustoapi.__authors__[0][1],
     author_email=clustoapi.__authors__[0][0],
     description=clustoapi.__desc__,
+    long_description=open(readme).read(),
     license='BSD',
     install_requires=install_requires,
     entry_points={
