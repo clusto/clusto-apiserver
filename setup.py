@@ -51,11 +51,12 @@ if 'install' not in args:
 
 setuptools.setup(
     name='clusto-apiserver',
+    url='https://github.com/clusto/clusto-apiserver',
     version=clustoapi.__version__,
     packages=setuptools.find_packages(),
-    author='Jorge Gallegos',
-    author_email='kad@blegh.net',
-    description='A clusto API server',
+    author=clustoapi.__authors__[0][1],
+    author_email=clustoapi.__authors__[0][0],
+    description=clustoapi.__desc__,
     license='BSD',
     install_requires=install_requires,
     entry_points={
