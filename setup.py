@@ -12,11 +12,9 @@ import clustoapi
 
 
 readme = os.path.join(os.path.dirname(sys.argv[0]), 'README.rst')
+reqs = os.path.join(os.path.dirname(sys.argv[0]), 'requirements.txt')
 
-install_requires = [
-    'clusto>0.6',
-    'bottle',
-]
+install_requires = open(reqs).readlines()
 
 # These two were introduced in 2.7
 if sys.version_info < (2, 7):
