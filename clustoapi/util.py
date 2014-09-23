@@ -77,18 +77,36 @@ def unclusto(obj):
     return str(obj)
 
 
-def show(obj):
-    result = {}
-    result['name'] = obj.name
-    result['driver'] = obj.driver
+def show(obj, mode='compact'):
 
-    attrs = []
-    for x in obj.attrs():
-        attrs.append(unclusto(x))
-    result['attrs'] = attrs
-    result['contents'] = [unclusto(x) for x in obj.contents()]
-    result['parents'] = [unclusto(x) for x in obj.parents()]
-    if isinstance(obj, clusto.drivers.resourcemanagers.ResourceManager):
-        result['count'] = obj.count
+    def compact():
+        return '/%s/%s' % (obj.driver, obj.name)
 
-    return result
+    def expanded():
+        result = {}
+        result['name'] = obj.name
+        result['driver'] = obj.driver
+
+        attrs = []
+        for x in obj.attrs():
+            attrs.append(unclusto(x))
+        result['attrs'] = attrs
+        result['contents'] = [unclusto(x) for x in obj.contents()]
+        result['parents'] = [unclusto(x) for x in obj.parents()]
+        if isinstance(obj, clusto.drivers.resourcemanagers.ResourceManager):
+            result['count'] = obj.count
+
+        return result
+
+    valid_modes = {
+        'compact': compact,
+        'expanded': expanded
+    }
+    if mode not in valid_modes:
+        mode_error = '\'{0}\' is not a valid mode.'.format(mode)
+        valid_mode_tip = 'Please choose from: {{{0}}}.'.format(
+            ','.join(valid_modes.keys())
+        )
+        raise TypeError('{0} {1}'.format(mode_error, valid_mode_tip))
+
+    return valid_modes[mode]()

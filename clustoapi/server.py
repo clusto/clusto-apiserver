@@ -232,6 +232,8 @@ One of the main ``clusto`` operations. Parameters:
 * Optional: one or more ``type`` parameter to filter out results
 * Optional: a boolean ``children`` parameter to search for children
   recursively (True by default)
+* Optional: a string ``mode`` parameter to expand or compact the objects
+  (compact by default)
 
 Examples:
 
@@ -260,6 +262,7 @@ Examples:
     types = bottle.request.params.getall('type')
     drivers = bottle.request.params.getall('driver')
     children = bottle.request.params.get('children', default=True, type=bool)
+    mode = bottle.request.params.get('mode', default='compact')
 
     try:
         ents = clusto.get_from_pools(
@@ -267,7 +270,7 @@ Examples:
         )
         results = []
         for ent in ents:
-            results.append(util.unclusto(ent))
+            results.append(util.show(ent, mode))
         return util.dumps(results)
     except TypeError as te:
         return util.dumps('%s' % (te,), 409)
@@ -285,6 +288,8 @@ One of the main ``clusto`` operations. Parameters:
 * Required path parameter: ``name`` - The name you're looking for
 * Optional: ``driver`` - If provided, a driver check will be added to
   ensure the resulting object is the type you're expecting
+* Optional: a string ``mode`` parameter to expand or compact the object
+  (expanded by default)
 
 Examples:
 
@@ -319,10 +324,14 @@ Examples:
 """
 
     driver = bottle.request.params.get('driver', default=None)
+    mode = bottle.request.params.get('mode', default='expanded')
     obj, status, msg = util.get(name, driver)
     if not obj:
         return util.dumps(msg, status)
-    return util.dumps(util.show(obj))
+    try:
+        return util.dumps(util.show(obj, mode))
+    except TypeError as te:
+        return util.dumps('%s' % (te,), 409)
 
 
 def _configure(config={}, configfile=None, init_data={}):
