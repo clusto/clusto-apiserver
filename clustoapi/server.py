@@ -260,7 +260,7 @@ Examples:
     types = bottle.request.params.getall('type')
     drivers = bottle.request.params.getall('driver')
     children = bottle.request.params.get('children', default=True, type=bool)
-    mode = bottle.request.headers.get('Mode', default='compact')
+    mode = bottle.request.headers.get('Clusto-Mode', default='compact')
 
     try:
         ents = clusto.get_from_pools(
@@ -320,7 +320,7 @@ Examples:
 """
 
     driver = bottle.request.params.get('driver', default=None)
-    mode = bottle.request.headers.get('Mode', default='expanded')
+    mode = bottle.request.headers.get('Clusto-Mode', default='expanded')
     obj, status, msg = util.get(name, driver)
     if not obj:
         return util.dumps(msg, status)
