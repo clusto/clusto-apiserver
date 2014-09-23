@@ -5,16 +5,27 @@
 #
 
 import os
+import pip.req
 import setuptools
 import sys
 
 import clustoapi
 
 
-readme = os.path.join(os.path.dirname(sys.argv[0]), 'README.rst')
-reqs = os.path.join(os.path.dirname(sys.argv[0]), 'requirements.txt')
+reqs = 'requirements.txt'
 
-install_requires = open(reqs).readlines()
+for arg in sys.argv[1:]:
+    if arg == 'test':
+        reqs = 'test-requirements.txt'
+    if arg == 'develop':
+        reqs = 'dev-requirements.txt'
+
+readme = os.path.join(os.path.dirname(sys.argv[0]), 'README.rst')
+reqs = os.path.join(os.path.dirname(sys.argv[0], reqs))
+
+install_requires = pip.req.parse_requirements(reqs)
+dependency_links = set([str(_.url) for _ in install_requires if _.url])
+install_requires = set([str(_.req) for _ in install_requires])
 
 # These two were introduced in 2.7
 if sys.version_info < (2, 7):
@@ -22,32 +33,6 @@ if sys.version_info < (2, 7):
         'importlib',
         'argparse'
     ])
-
-# only required when you are doing testing
-test_requires = [
-    'shelldoctest',
-    'pep8',
-    'port-for',
-]
-
-# These are not required, but give you nice colors in the UI
-develop_requires = test_requires
-develop_requires.extend([
-    'docutils',
-    'Pygments',
-    'sphinx',
-])
-
-args = sys.argv[1:]
-# if we are installing just punt all extra reqs and do install_requires only
-if 'install' not in args:
-    for arg in args:
-        if arg == 'develop':
-            install_requires.extend(develop_requires)
-            continue
-        if arg == 'test':
-            install_requires.extend(test_requires)
-            continue
 
 
 setuptools.setup(
@@ -61,6 +46,7 @@ setuptools.setup(
     long_description=open(readme).read(),
     license='BSD',
     install_requires=install_requires,
+    dependency_links=dependency_links,
     entry_points={
         'console_scripts': [
             'clusto-apiserver=clustoapi.server:main'
