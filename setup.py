@@ -21,7 +21,7 @@ for arg in sys.argv[1:]:
         reqs = 'dev-requirements.txt'
 
 readme = os.path.join(os.path.dirname(sys.argv[0]), 'README.rst')
-reqs = os.path.join(os.path.dirname(sys.argv[0], reqs))
+reqs = os.path.join(os.path.dirname(sys.argv[0]), reqs)
 
 install_requires = pip.req.parse_requirements(reqs)
 dependency_links = set([str(_.url) for _ in install_requires if _.url])
