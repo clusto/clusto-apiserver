@@ -232,8 +232,6 @@ One of the main ``clusto`` operations. Parameters:
 * Optional: one or more ``type`` parameter to filter out results
 * Optional: a boolean ``children`` parameter to search for children
   recursively (True by default)
-* Optional: a string ``mode`` parameter to expand or compact the objects
-  (compact by default)
 
 Examples:
 
@@ -262,7 +260,7 @@ Examples:
     types = bottle.request.params.getall('type')
     drivers = bottle.request.params.getall('driver')
     children = bottle.request.params.get('children', default=True, type=bool)
-    mode = bottle.request.params.get('mode', default='compact')
+    mode = bottle.request.headers.get('Mode', default='compact')
 
     try:
         ents = clusto.get_from_pools(
@@ -288,8 +286,6 @@ One of the main ``clusto`` operations. Parameters:
 * Required path parameter: ``name`` - The name you're looking for
 * Optional: ``driver`` - If provided, a driver check will be added to
   ensure the resulting object is the type you're expecting
-* Optional: a string ``mode`` parameter to expand or compact the object
-  (expanded by default)
 
 Examples:
 
@@ -324,7 +320,7 @@ Examples:
 """
 
     driver = bottle.request.params.get('driver', default=None)
-    mode = bottle.request.params.get('mode', default='expanded')
+    mode = bottle.request.headers.get('Mode', default='expanded')
     obj, status, msg = util.get(name, driver)
     if not obj:
         return util.dumps(msg, status)

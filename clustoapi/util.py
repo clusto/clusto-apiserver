@@ -77,7 +77,7 @@ def unclusto(obj):
     return str(obj)
 
 
-def show(obj, mode='compact'):
+def show(obj, mode='expanded'):
 
     def compact():
         return '/%s/%s' % (obj.driver, obj.name)
