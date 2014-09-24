@@ -32,8 +32,10 @@ Custom Headers
 The Clusto API Server comes with the ability to pass certain headers to
 multiple operations.
 
-:Clusto-Mode: Determines if an object is compact or expanded. Compaction of
-  objects helps speed up response time for multiple object lookups.
+:Clusto-Mode: Determines if an object is ``compact`` or ``expanded``.
+  Compaction of objects helps speed up response time for multiple object
+  lookups. ``expanded`` is the default mode if the function returns only one
+  object, and is ``compact`` by default for all listing functions.
 
 """
 
