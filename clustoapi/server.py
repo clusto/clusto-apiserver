@@ -264,6 +264,31 @@ Examples:
     HTTP: 200
     Content-type: application/json
 
+    $ ${get} -H 'Clusto-Mode: expanded' -d 'pool=multipool' ${server_url}/from-pools
+    [
+        {
+            "attrs": [],
+            "contents": [],
+            "driver": "basicserver",
+            "name": "testserver1",
+            "parents": [
+                "/pool/singlepool",
+                "/pool/multipool"
+            ]
+        },
+        {
+            "attrs": [],
+            "contents": [],
+            "driver": "basicserver",
+            "name": "testserver2",
+            "parents": [
+                "/pool/multipool"
+            ]
+        }
+    ]
+    HTTP: 200
+    Content-type: application/json
+
 """
 
     pools = bottle.request.params.getall('pool')
