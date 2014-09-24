@@ -27,6 +27,14 @@ The Clusto API Server should thus have the following required features:
  *  Resource manipulation: allocate and deallocate objects from resources
  *  Querying
 
+Custom Headers
+--------------
+The Clusto API Server comes with the ability to pass certain headers to
+multiple operations.
+
+:Clusto-Mode: Determines if an object is compact or expanded. Compaction of
+  objects helps speed up response time for multiple object lookups.
+
 """
 
 import bottle
