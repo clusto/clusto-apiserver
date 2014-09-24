@@ -304,6 +304,11 @@ Examples:
     HTTP: 404
     Content-type: application/json
 
+    $ ${get} -H 'Clusto-Mode: compact' ${server_url}/by-name/testserver1
+    "/basicserver/testserver1"
+    HTTP: 200
+    Content-type: application/json
+
     $ ${get} ${server_url}/by-name/testserver1
     {
         "attrs": [],
