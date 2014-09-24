@@ -379,6 +379,72 @@ Examples:
         return util.dumps('%s' % (te,), 409)
 
 
+@root_app.get('/by-names/<names>')
+def get_by_names(names):
+    """
+One of the main ``clusto`` operations. Parameters:
+
+* Required path parameter: ``names`` - The names you're looking for,
+  separated by a comma.
+
+Examples:
+
+.. code:: bash
+
+    $ ${get} ${server_url}/by-names/nonserver
+    [
+        null
+    ]
+    HTTP: 200
+    Content-type: application/json
+
+    $ ${get} ${server_url}/by-names/testserver1,nonserver
+    [
+        "/basicserver/testserver1",
+        null
+    ]
+    HTTP: 200
+    Content-type: application/json
+
+    $ ${get} -H 'Clusto-Mode: expanded' ${server_url}/by-names/testserver1,testserver2
+    [
+        {
+            "attrs": [],
+            "contents": [],
+            "driver": "basicserver",
+            "name": "testserver1",
+            "parents": [
+                "/pool/singlepool",
+                "/pool/multipool"
+            ]
+        },
+        {
+            "attrs": [],
+            "contents": [],
+            "driver": "basicserver",
+            "name": "testserver2",
+            "parents": [
+            "/pool/multipool"
+            ]
+        }
+    ]
+    HTTP: 200
+    Content-type: application/json
+
+"""
+
+    objs = []
+    mode = bottle.request.headers.get('Clusto-Mode', default='compact')
+    for name in names.split(','):
+        obj, status, msg = util.get(name)
+        try:
+            objs.append(util.show(obj, mode) if obj else None)
+        except TypeError as te:
+            return util.dumps('%s' % (te,), 409)
+
+    return util.dumps(objs)
+
+
 def _configure(config={}, configfile=None, init_data={}):
     """
 Configure the root app
