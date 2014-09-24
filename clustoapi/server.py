@@ -252,13 +252,40 @@ Examples:
     HTTP: 412
     Content-type: application/json
 
-    $ ${get} -d 'pool=testpool1' ${server_url}/from-pools
+    $ ${get} -d 'pool=emptypool' ${server_url}/from-pools
     []
     HTTP: 200
     Content-type: application/json
 
-    $ ${get} -d 'pool=testpool1' -d 'pool=testpool2' ${server_url}/from-pools
-    []
+    $ ${get} -d 'pool=singlepool' -d 'pool=multipool' ${server_url}/from-pools
+    [
+        "/basicserver/testserver1"
+    ]
+    HTTP: 200
+    Content-type: application/json
+
+    $ ${get} -H 'Clusto-Mode: expanded' -d 'pool=multipool' ${server_url}/from-pools
+    [
+        {
+            "attrs": [],
+            "contents": [],
+            "driver": "basicserver",
+            "name": "testserver1",
+            "parents": [
+                "/pool/singlepool",
+                "/pool/multipool"
+            ]
+        },
+        {
+            "attrs": [],
+            "contents": [],
+            "driver": "basicserver",
+            "name": "testserver2",
+            "parents": [
+                "/pool/multipool"
+            ]
+        }
+    ]
     HTTP: 200
     Content-type: application/json
 
@@ -321,7 +348,10 @@ Examples:
         "contents": [],
         "driver": "basicserver",
         "name": "testserver1",
-        "parents": []
+        "parents": [
+            "/pool/singlepool",
+            "/pool/multipool"
+        ]
     }
     HTTP: 200
     Content-type: application/json
@@ -368,7 +398,14 @@ Configure the root app
 #   If init_data is provided, populate it in the clusto database
     if init_data:
         for name, data in init_data.items():
-            clusto.get_or_create(name, data['driver'], **data.get('attrs', {}))
+            ent = clusto.get_or_create(
+                name,
+                data['driver'],
+                **data.get('attrs', {})
+            )
+            for pool in data.get('member_of', []):
+                clusto.get_by_name(pool).insert(ent)
+
     kwargs = {}
     kwargs['host'] = config.get(
         'host',

@@ -62,10 +62,17 @@ class TestingServer(threading.Thread):
             },
             configfile=conffile,
             init_data={
-                'testpool1': {'driver': clusto.drivers.pool.Pool},
-                'testpool2': {'driver': clusto.drivers.pool.Pool},
-                'testserver1': {'driver': clusto.drivers.servers.BasicServer},
-                'testserver2': {'driver': clusto.drivers.servers.BasicServer},
+                'emptypool': {'driver': clusto.drivers.pool.Pool},
+                'singlepool': {'driver': clusto.drivers.pool.Pool},
+                'multipool': {'driver': clusto.drivers.pool.Pool},
+                'testserver1': {
+                    'driver': clusto.drivers.servers.BasicServer,
+                    'member_of': ['singlepool', 'multipool']
+                },
+                'testserver2': {
+                    'driver': clusto.drivers.servers.BasicServer,
+                    'member_of': ['multipool']
+                },
                 'testnames': {
                     'driver': clusto.drivers.resourcemanagers.SimpleEntityNameManager,
                     'attrs': {'basename': 's'},
