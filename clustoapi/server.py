@@ -295,6 +295,10 @@ One of the main ``clusto`` operations. Parameters:
 * Optional: ``driver`` - If provided, a driver check will be added to
   ensure the resulting object is the type you're expecting
 
+.. note:: This function returns expanded objects by default in order
+  to reduce the amount of required custom headers. Therefore, the header
+  is not required to receive expanded objects.
+
 Examples:
 
 .. code:: bash
