@@ -27,6 +27,16 @@ The Clusto API Server should thus have the following required features:
  *  Resource manipulation: allocate and deallocate objects from resources
  *  Querying
 
+Custom Headers
+--------------
+The Clusto API Server comes with the ability to pass certain headers to
+multiple operations.
+
+:Clusto-Mode: Determines if an object is ``compact`` or ``expanded``.
+  Compaction of objects helps speed up response time for multiple object
+  lookups. ``expanded`` is the default mode if the function returns only one
+  object, and is ``compact`` by default for all listing functions.
+
 """
 
 import bottle
@@ -260,6 +270,7 @@ Examples:
     types = bottle.request.params.getall('type')
     drivers = bottle.request.params.getall('driver')
     children = bottle.request.params.get('children', default=True, type=bool)
+    mode = bottle.request.headers.get('Clusto-Mode', default='compact')
 
     try:
         ents = clusto.get_from_pools(
@@ -267,7 +278,7 @@ Examples:
         )
         results = []
         for ent in ents:
-            results.append(util.unclusto(ent))
+            results.append(util.show(ent, mode))
         return util.dumps(results)
     except TypeError as te:
         return util.dumps('%s' % (te,), 409)
@@ -286,6 +297,10 @@ One of the main ``clusto`` operations. Parameters:
 * Optional: ``driver`` - If provided, a driver check will be added to
   ensure the resulting object is the type you're expecting
 
+.. note:: This function returns expanded objects by default in order
+  to reduce the amount of required custom headers. Therefore, the header
+  is not required to receive expanded objects.
+
 Examples:
 
 .. code:: bash
@@ -293,6 +308,11 @@ Examples:
     $ ${get} ${server_url}/by-name/nonserver
     "Object \"nonserver\" not found (nonserver does not exist.)"
     HTTP: 404
+    Content-type: application/json
+
+    $ ${get} -H 'Clusto-Mode: compact' ${server_url}/by-name/testserver1
+    "/basicserver/testserver1"
+    HTTP: 200
     Content-type: application/json
 
     $ ${get} ${server_url}/by-name/testserver1
@@ -319,10 +339,14 @@ Examples:
 """
 
     driver = bottle.request.params.get('driver', default=None)
+    mode = bottle.request.headers.get('Clusto-Mode', default='expanded')
     obj, status, msg = util.get(name, driver)
     if not obj:
         return util.dumps(msg, status)
-    return util.dumps(util.show(obj))
+    try:
+        return util.dumps(util.show(obj, mode))
+    except TypeError as te:
+        return util.dumps('%s' % (te,), 409)
 
 
 def _configure(config={}, configfile=None, init_data={}):
