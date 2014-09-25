@@ -6,6 +6,9 @@
 # Copyright 2013, Jorge Gallegos <kad@blegh.net>
 
 """
+Overview
+--------
+
 The Clusto API Server will work as an alternative to the direct database
 access traditional clusto commands and libraries use.
 
@@ -27,6 +30,7 @@ The Clusto API Server should thus have the following required features:
  *  Resource manipulation: allocate and deallocate objects from resources
  *  Querying
 
+
 Custom Headers
 --------------
 The Clusto API Server comes with the ability to pass certain headers to
@@ -36,6 +40,10 @@ multiple operations.
   Compaction of objects helps speed up response time for multiple object
   lookups. ``expanded`` is the default mode if the function returns only one
   object, and is ``compact`` by default for all listing functions.
+
+
+API Docs
+--------
 
 """
 
