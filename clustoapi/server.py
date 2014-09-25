@@ -434,6 +434,14 @@ Examples:
     HTTP: 200
     Content-type: application/json
 
+    $ ${get} ${server_url}/by-names/nonserver1,nonserver2
+    [
+        null,
+        null
+    ]
+    HTTP: 404
+    Content-type: application/json
+
 """
 
     objs = []
