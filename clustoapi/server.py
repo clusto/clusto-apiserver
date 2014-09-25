@@ -379,6 +379,91 @@ Examples:
         return util.dumps('%s' % (te,), 409)
 
 
+@root_app.get('/by-names')
+def get_by_names():
+    """
+One of the main ``clusto`` operations. Parameters:
+
+* Required parameter: At least one ``name`` parameter
+
+Returns ``HTTP: 404`` when all entites requested do not exist and
+``HTTP: 206`` when a percent of entities requested do not exist.
+
+Examples:
+
+.. code:: bash
+
+    $ ${get} ${server_url}/by-names
+    "Provide at least one name to get data from"
+    HTTP: 412
+    Content-type: application/json
+
+    $ ${get} -d 'name=nonserver' ${server_url}/by-names
+    [
+        null
+    ]
+    HTTP: 404
+    Content-type: application/json
+
+    $ ${get} -d 'name=testserver1' -d 'name=nonserver' ${server_url}/by-names
+    [
+        "/basicserver/testserver1",
+        null
+    ]
+    HTTP: 206
+    Content-type: application/json
+
+    $ ${get} -H 'Clusto-Mode: expanded' -d 'name=testserver1' -d 'name=testserver2' ${server_url}/by-names
+    [
+        {
+            "attrs": [],
+            "contents": [],
+            "driver": "basicserver",
+            "name": "testserver1",
+            "parents": [
+                "/pool/singlepool",
+                "/pool/multipool"
+            ]
+        },
+        {
+            "attrs": [],
+            "contents": [],
+            "driver": "basicserver",
+            "name": "testserver2",
+            "parents": [
+            "/pool/multipool"
+            ]
+        }
+    ]
+    HTTP: 200
+    Content-type: application/json
+
+    $ ${get} -d 'name=nonserver1' -d 'name=nonserver2' ${server_url}/by-names
+    [
+        null,
+        null
+    ]
+    HTTP: 404
+    Content-type: application/json
+
+"""
+
+    objs = []
+    names = bottle.request.params.getall('name')
+    if not names:
+        return util.dumps('Provide at least one name to get data from', 412)
+
+    mode = bottle.request.headers.get('Clusto-Mode', default='compact')
+    for name in names:
+        obj, status, msg = util.get(name)
+        try:
+            objs.append(util.show(obj, mode) if obj else None)
+        except TypeError as te:
+            return util.dumps('%s' % (te,), 409)
+
+    return util.dumps(objs, 200 if all(objs) else 206 if any(objs) else 404)
+
+
 def _configure(config={}, configfile=None, init_data={}):
     """
 Configure the root app
