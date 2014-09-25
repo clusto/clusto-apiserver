@@ -387,6 +387,9 @@ One of the main ``clusto`` operations. Parameters:
 * Required path parameter: ``names`` - The names you're looking for,
   separated by a comma.
 
+Returns ``HTTP: 404`` when all entites requested do not exist and
+``HTTP: 206`` when a percent of entities requested do not exist.
+
 Examples:
 
 .. code:: bash
@@ -395,7 +398,7 @@ Examples:
     [
         null
     ]
-    HTTP: 200
+    HTTP: 404
     Content-type: application/json
 
     $ ${get} ${server_url}/by-names/testserver1,nonserver
@@ -403,7 +406,7 @@ Examples:
         "/basicserver/testserver1",
         null
     ]
-    HTTP: 200
+    HTTP: 206
     Content-type: application/json
 
     $ ${get} -H 'Clusto-Mode: expanded' ${server_url}/by-names/testserver1,testserver2
@@ -442,7 +445,7 @@ Examples:
         except TypeError as te:
             return util.dumps('%s' % (te,), 409)
 
-    return util.dumps(objs)
+    return util.dumps(objs, 200 if all(objs) else 206 if any(objs) else 404)
 
 
 def _configure(config={}, configfile=None, init_data={}):
