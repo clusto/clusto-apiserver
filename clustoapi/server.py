@@ -504,6 +504,104 @@ Examples:
     return util.dumps(objs, 200 if all(objs) else 206 if any(objs) else 404)
 
 
+@root_app.get('/by-attr')
+def get_by_attr():
+    """
+One of the main ``clusto`` operations. Parameters:
+
+* Required: the ``key`` parameter
+* Optional: the ``subkey`` parameter
+* Optional: the ``value`` parameter
+
+Examples:
+
+.. code:: bash
+
+    $ ${get} ${server_url}/by-attr
+    "Provide a key to use get_by_attr"
+    HTTP: 412
+    Content-type: application/json
+
+    $ ${get} -d 'key=nonkey' ${server_url}/by-attr
+    []
+    HTTP: 200
+    Content-type: application/json
+
+    $ ${get} -d 'key=key1' -d 'subkey=subkey1' -d 'value=value1' ${server_url}/by-attr
+    [
+        "/basicserver/testserver1"
+    ]
+    HTTP: 200
+    Content-type: application/json
+
+    $ ${get} -H 'Clusto-Mode: expanded' -d 'key=key1' ${server_url}/by-attr
+    [
+        {
+            "attrs": [
+                {
+                    "datatype": "string",
+                    "key": "key1",
+                    "number": null,
+                    "subkey": "subkey1",
+                    "value": "value1"
+                }
+            ],
+            "contents": [],
+            "driver": "basicserver",
+            "name": "testserver1",
+            "parents": [
+                "/pool/singlepool",
+                "/pool/multipool"
+            ]
+        },
+        {
+            "attrs": [
+                {
+                    "datatype": "string",
+                    "key": "key1",
+                    "number": null,
+                    "subkey": "subkey2",
+                    "value": "value2"
+                }
+            ],
+            "contents": [],
+            "driver": "basicserver",
+            "name": "testserver2",
+            "parents": [
+                "/pool/multipool"
+            ]
+        }
+    ]
+    HTTP: 200
+    Content-type: application/json
+
+"""
+    params = ['key', 'subkey', 'value']
+    kwargs = {}
+    for param in params:
+        val = bottle.request.params.get(param)
+        if val:
+            kwargs[param] = val
+
+    if not kwargs.get('key'):
+        return util.dumps('Provide a key to use get_by_attr', 412)
+
+    mode = bottle.request.headers.get('Clusto-Mode', default='compact')
+
+    try:
+        ents = clusto.get_by_attr(**kwargs)
+        results = []
+        for ent in ents:
+            results.append(util.show(ent, mode))
+        return util.dumps(results)
+    except TypeError as te:
+        return util.dumps('%s' % (te,), 409)
+    except LookupError as le:
+        return util.dumps('%s' % (le,), 404)
+    except Exception as e:
+        return util.dumps('%s' % (e,), 500)
+
+
 def _configure(config={}, configfile=None, init_data={}):
     """
 Configure the root app
