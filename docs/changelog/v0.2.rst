@@ -1,0 +1,29 @@
+Version 0.2.0
+=============
+
+First "real" release, including additional tests and finally some PR
+contributions :) (Thanks James!)
+
+
+Features
+--------
+
+* Split install requirements into 3 files, which can be read either by ``pip``
+  or by the ``setup.py`` script.
+
+  * ``requirements.txt`` is the usual file you install from
+  * ``test-requirements.txt`` is a file intended for use when you are testing
+    this repo.
+  * ``dev-requirements.txt`` is the file you should install from if you are
+    hacking in this repo.
+
+* Added a custom ``Clusto-Mode`` header to change how the JSON data is
+  presented back:
+
+  * ``compact`` mode: is the default for API calls that return a list of items
+    back to the requestor.
+  * ``expanded`` mode: is the default for API calls that return a single item
+    back to the requestor
+
+* Added a ``by-names`` endpoint, it receives a list of parameters and will
+  return back a list of items found
