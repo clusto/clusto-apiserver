@@ -67,11 +67,17 @@ class TestingServer(threading.Thread):
                 'multipool': {'driver': clusto.drivers.pool.Pool},
                 'testserver1': {
                     'driver': clusto.drivers.servers.BasicServer,
-                    'member_of': ['singlepool', 'multipool']
+                    'member_of': ['singlepool', 'multipool'],
+                    'attr_list': [
+                        {'key': 'key1', 'subkey': 'subkey1', 'value': 'value1'}
+                    ]
                 },
                 'testserver2': {
                     'driver': clusto.drivers.servers.BasicServer,
-                    'member_of': ['multipool']
+                    'member_of': ['multipool'],
+                    'attr_list': [
+                        {'key': 'key1', 'subkey': 'subkey2', 'value': 'value2'}
+                    ]
                 },
                 'testnames': {
                     'driver': clusto.drivers.resourcemanagers.SimpleEntityNameManager,

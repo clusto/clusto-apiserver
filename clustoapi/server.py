@@ -267,7 +267,15 @@ Examples:
     $ ${get} -H 'Clusto-Mode: expanded' -d 'pool=multipool' ${server_url}/from-pools
     [
         {
-            "attrs": [],
+            "attrs": [
+                {
+                    "datatype": "string",
+                    "key": "key1",
+                    "number": null,
+                    "subkey": "subkey1",
+                    "value": "value1"
+                }
+            ],
             "contents": [],
             "driver": "basicserver",
             "name": "testserver1",
@@ -277,7 +285,15 @@ Examples:
             ]
         },
         {
-            "attrs": [],
+            "attrs": [
+                {
+                    "datatype": "string",
+                    "key": "key1",
+                    "number": null,
+                    "subkey": "subkey2",
+                    "value": "value2"
+                }
+            ],
             "contents": [],
             "driver": "basicserver",
             "name": "testserver2",
@@ -344,7 +360,15 @@ Examples:
 
     $ ${get} ${server_url}/by-name/testserver1
     {
-        "attrs": [],
+        "attrs": [
+            {
+                "datatype": "string",
+                "key": "key1",
+                "number": null,
+                "subkey": "subkey1",
+                "value": "value1"
+            }
+        ],
         "contents": [],
         "driver": "basicserver",
         "name": "testserver1",
@@ -416,7 +440,15 @@ Examples:
     $ ${get} -H 'Clusto-Mode: expanded' -d 'name=testserver1' -d 'name=testserver2' ${server_url}/by-names
     [
         {
-            "attrs": [],
+            "attrs": [
+                {
+                    "datatype": "string",
+                    "key": "key1",
+                    "number": null,
+                    "subkey": "subkey1",
+                    "value": "value1"
+                }
+            ],
             "contents": [],
             "driver": "basicserver",
             "name": "testserver1",
@@ -426,7 +458,15 @@ Examples:
             ]
         },
         {
-            "attrs": [],
+            "attrs": [
+                {
+                    "datatype": "string",
+                    "key": "key1",
+                    "number": null,
+                    "subkey": "subkey2",
+                    "value": "value2"
+                }
+            ],
             "contents": [],
             "driver": "basicserver",
             "name": "testserver2",
@@ -490,6 +530,9 @@ Configure the root app
             )
             for pool in data.get('member_of', []):
                 clusto.get_by_name(pool).insert(ent)
+
+            for attr in data.get('attr_list', []):
+                ent.set_attr(**attr)
 
     kwargs = {}
     kwargs['host'] = config.get(
