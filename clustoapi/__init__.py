@@ -6,7 +6,7 @@
 
 __major__ = 0
 __minor__ = 2
-__release__ = 0
+__release__ = 1
 __dotbranch__ = (__major__, __minor__,)
 __branch__ = u'.'.join([u'%s' % (_,) for _ in __dotbranch__])
 __dotversion__ = (__major__, __minor__, __release__,)
