@@ -6,22 +6,24 @@ About
 
 .. include:: ../README.rst
 
+.. include:: changelog/current.rst
+
 
 Changelog
 ---------
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :glob:
 
-   changelog/*
+   changelog/v**
 
 
 Table of contents
 -----------------
 
 Main server components
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. toctree::
    :maxdepth: 2
@@ -31,7 +33,7 @@ Main server components
 
 
 Core applications
-~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^
 
 .. toctree::
    :maxdepth: 2
