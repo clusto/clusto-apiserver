@@ -45,6 +45,7 @@ the driver given. Returns:
 
 def dumps(obj, code=200, headers={}):
     """
+Dumps a given object as a JSON string in an HTTP Response object
 """
     return bottle.HTTPResponse(
         json.dumps(
@@ -58,10 +59,10 @@ def dumps(obj, code=200, headers={}):
 
 
 def unclusto(obj):
-    '''
-    Convert an object to a representation that can be safely serialized into
-    JSON.
-    '''
+    """
+Convert an object to a representation that can be safely serialized into
+JSON.
+"""
     if type(obj) in (str, unicode, int) or obj is None:
         return obj
     if isinstance(obj, clusto.Attribute):
@@ -78,9 +79,12 @@ def unclusto(obj):
 
 
 def show(obj, mode='expanded'):
+    """
+Will return the expanded or compact representation of a given object
+"""
 
     def compact():
-        return '/%s/%s' % (obj.driver, obj.name)
+        return u'/%s/%s' % (obj.driver, obj.name)
 
     def expanded():
         result = {}

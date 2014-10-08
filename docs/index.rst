@@ -20,11 +20,24 @@ Changelog
 Table of contents
 -----------------
 
+Main server components
+~~~~~~~~~~~~~~~~~~~~~~
+
 .. toctree::
    :maxdepth: 2
    :glob:
 
    clustoapi/*
+
+
+Core applications
+~~~~~~~~~~~~~~~~~
+
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   clustoapi/apps/*
 
 
 Indices and tables
