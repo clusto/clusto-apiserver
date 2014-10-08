@@ -52,6 +52,16 @@ setuptools.setup(
             'clusto-apiserver=clustoapi.server:main'
         ],
     },
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Web Environment',
+        'Framework :: Bottle',
+        'Intended Audience :: System Administrators',
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Topic :: Internet :: WWW/HTTP :: WSGI :: Application',
+    ],
     zip_safe=False,
     test_suite='tests.all.test_suites',
 )
