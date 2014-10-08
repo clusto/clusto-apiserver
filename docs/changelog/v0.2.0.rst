@@ -1,12 +1,12 @@
 Version 0.2.0
-=============
+-------------
 
 First "real" release, including additional tests and finally some PR
 contributions :) (Thanks James!)
 
 
 Features
---------
+^^^^^^^^
 
 * Split install requirements into 3 files, which can be read either by ``pip``
   or by the ``setup.py`` script.
