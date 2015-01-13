@@ -1,2 +1,2 @@
-clusto==0.7.7
-bottle==0.12.7
+clusto>0.6
+bottle
