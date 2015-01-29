@@ -306,10 +306,12 @@ Examples:
     drivers = bottle.request.params.getall('driver')
     children = bottle.request.params.get('children', default=True, type=bool)
     mode = bottle.request.headers.get('Clusto-Mode', default='compact')
-    current = int(bottle.request.headers.get('Clusto-Page', default='0'))
-    per = int(bottle.request.headers.get('Clusto-Per-Page', default='50'))
 
     try:
+        # Assignments are moved into the try block because of the int casting.
+        current = int(bottle.request.headers.get('Clusto-Page', default='0'))
+        per = int(bottle.request.headers.get('Clusto-Per-Page', default='50'))
+
         ents = clusto.get_from_pools(
             pools, clusto_types=types, clusto_drivers=drivers, search_children=children
         )
