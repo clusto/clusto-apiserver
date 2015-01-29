@@ -306,15 +306,25 @@ Examples:
     drivers = bottle.request.params.getall('driver')
     children = bottle.request.params.get('children', default=True, type=bool)
     mode = bottle.request.headers.get('Clusto-Mode', default='compact')
+    current = int(bottle.request.headers.get('Clusto-Page', default='0'))
+    per = int(bottle.request.headers.get('Clusto-Per-Page', default='50'))
 
     try:
         ents = clusto.get_from_pools(
             pools, clusto_types=types, clusto_drivers=drivers, search_children=children
         )
         results = []
+        headers = {}
+        if current:
+            ents, total = util.page(list(ents), current=current, per=per)
+            headers = {
+                'Clusto-Pages': total,
+                'Clusto-Per-Page': per,
+                'Clusto-Page': current
+            }
         for ent in ents:
             results.append(util.show(ent, mode))
-        return util.dumps(results)
+        return util.dumps(results, headers=headers)
     except TypeError as te:
         return util.dumps('%s' % (te,), 409)
     except LookupError as le:
