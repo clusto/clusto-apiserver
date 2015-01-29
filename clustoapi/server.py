@@ -41,6 +41,15 @@ multiple operations.
   lookups. ``expanded`` is the default mode if the function returns only one
   object, and is ``compact`` by default for all listing functions.
 
+:Clusto-Per-Page: Number of entities to return when pagination is requested.
+  Defaults to ``50``.
+
+:Clusto-Page: Requests the current page in a list of entities, delimited by
+  ``Clusto-Per-Page``.
+
+:Clusto-Pages: Response only. This header returns the total number of pages
+  to the requester.
+
 
 API Docs
 --------
@@ -260,6 +269,11 @@ Examples:
     HTTP: 412
     Content-type: application/json
 
+    $ ${get} -H 'Clusto-Page: notanint' -d 'pool=emptypool' ${server_url}/from-pools
+    "invalid literal for int() with base 10: 'notanint'"
+    HTTP: 400
+    Content-type: application/json
+
     $ ${get} -d 'pool=emptypool' ${server_url}/from-pools
     []
     HTTP: 200
@@ -297,6 +311,26 @@ Examples:
     HTTP: 200
     Content-type: application/json
 
+    $ ${get} -H 'Clusto-Page: 1'  -H 'Clusto-Per-Page: 1' -d 'pool=multipool' ${server_url}/from-pools
+    [
+        "/basicserver/testserver1"
+    ]
+    HTTP: 200
+    Content-type: application/json
+
+    $ ${get} -H 'Clusto-Page: 1'  -H 'Clusto-Per-Page: 100' -d 'pool=multipool' ${server_url}/from-pools
+    [
+        "/basicserver/testserver1",
+        "/basicserver/testserver2"
+    ]
+    HTTP: 200
+    Content-type: application/json
+
+    $ ${get} -H 'Clusto-Page: 100'  -H 'Clusto-Per-Page: 100' -d 'pool=multipool' ${server_url}/from-pools
+    []
+    HTTP: 200
+    Content-type: application/json
+
 """
 
     pools = bottle.request.params.getall('pool')
@@ -308,13 +342,27 @@ Examples:
     mode = bottle.request.headers.get('Clusto-Mode', default='compact')
 
     try:
+        # Assignments are moved into the try block because of the int casting.
+        current = int(bottle.request.headers.get('Clusto-Page', default='0'))
+        per = int(bottle.request.headers.get('Clusto-Per-Page', default='50'))
+
         ents = clusto.get_from_pools(
             pools, clusto_types=types, clusto_drivers=drivers, search_children=children
         )
         results = []
+        headers = {}
+        if current:
+            ents, total = util.page(list(ents), current=current, per=per)
+            headers = {
+                'Clusto-Pages': total,
+                'Clusto-Per-Page': per,
+                'Clusto-Page': current
+            }
         for ent in ents:
             results.append(util.show(ent, mode))
-        return util.dumps(results)
+        return util.dumps(results, headers=headers)
+    except ValueError as ve:
+        return util.dumps('%s' % (ve,), 400)
     except TypeError as te:
         return util.dumps('%s' % (te,), 409)
     except LookupError as le:

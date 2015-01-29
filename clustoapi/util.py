@@ -114,3 +114,21 @@ Will return the expanded or compact representation of a given object
         raise TypeError('{0} {1}'.format(mode_error, valid_mode_tip))
 
     return valid_modes[mode]()
+
+
+def page(ents, current=1, per=50):
+    """
+Takes a list of entities and drops all from a list but the current page.
+Returns a tuple that has the entities and also a page total so it may be
+returned to the client.
+"""
+
+    first = (current - 1) * per
+    last = current * per - 1
+    # 0:1 edge case with one entitiy.
+    if not last:
+        last = 1
+
+    total = len(ents) / per
+    total = total + 1 if len(ents) % per else 0
+    return ents[first:last], total
