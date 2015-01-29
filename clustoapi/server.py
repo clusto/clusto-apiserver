@@ -336,6 +336,8 @@ Examples:
         for ent in ents:
             results.append(util.show(ent, mode))
         return util.dumps(results, headers=headers)
+    except ValueError as ve:
+        return util.dumps('%s' % (ve,), 400)
     except TypeError as te:
         return util.dumps('%s' % (te,), 409)
     except LookupError as le:
