@@ -269,6 +269,11 @@ Examples:
     HTTP: 412
     Content-type: application/json
 
+    $ ${get} -H 'Clusto-Page: notanint' -d 'pool=emptypool' ${server_url}/from-pools
+    "invalid literal for int() with base 10: 'notanint'"
+    HTTP: 400
+    Content-type: application/json
+
     $ ${get} -d 'pool=emptypool' ${server_url}/from-pools
     []
     HTTP: 200
@@ -303,6 +308,26 @@ Examples:
             ]
         }
     ]
+    HTTP: 200
+    Content-type: application/json
+
+    $ ${get} -H 'Clusto-Page: 1'  -H 'Clusto-Per-Page: 1' -d 'pool=multipool' ${server_url}/from-pools
+    [
+        "/basicserver/testserver1"
+    ]
+    HTTP: 200
+    Content-type: application/json
+
+    $ ${get} -H 'Clusto-Page: 1'  -H 'Clusto-Per-Page: 100' -d 'pool=multipool' ${server_url}/from-pools
+    [
+        "/basicserver/testserver1",
+        "/basicserver/testserver2"
+    ]
+    HTTP: 200
+    Content-type: application/json
+
+    $ ${get} -H 'Clusto-Page: 100'  -H 'Clusto-Per-Page: 100' -d 'pool=multipool' ${server_url}/from-pools
+    []
     HTTP: 200
     Content-type: application/json
 
