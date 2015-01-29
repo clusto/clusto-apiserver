@@ -124,8 +124,11 @@ returned to the client.
 """
 
     first = (current - 1) * per
+    last = current * per - 1
     # 0:1 edge case with one entitiy.
-    last = current * per - 1 if current is not 1 and per is not 1 else 1
+    if not last:
+        last = 1
+
     total = len(ents) / per
     total = total + 1 if len(ents) % per else 0
     return ents[first:last], total
