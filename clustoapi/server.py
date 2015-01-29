@@ -41,6 +41,15 @@ multiple operations.
   lookups. ``expanded`` is the default mode if the function returns only one
   object, and is ``compact`` by default for all listing functions.
 
+:Clusto-Per-Page: Number of entities to return when pagination is requested.
+  Defaults to ``50``.
+
+:Clusto-Page: Requests the current page in a list of entities, delimited by
+  ``Clusto-Per-Page``.
+
+:Clusto-Pages: Response only. This header returns the total number of pages
+  to the requester.
+
 
 API Docs
 --------
