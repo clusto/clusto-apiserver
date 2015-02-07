@@ -347,6 +347,11 @@ Examples:
     HTTP: 200
     Content-type: application/json
 
+    $ ${get} -H 'Clusto-Minify: True' -d 'pool=multipool' ${server_url}/from-pools
+    ["/basicserver/testserver1", "/basicserver/testserver2"]
+    HTTP: 200
+    Content-type: application/json
+
 """
 
     pools = bottle.request.params.getall('pool')
