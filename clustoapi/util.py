@@ -45,13 +45,16 @@ the driver given. Returns:
 
 def dumps(obj, code=200, headers={}):
     """
-Dumps a given object as a JSON string in an HTTP Response object
+Dumps a given object as a JSON string in an HTTP Response object.
+Will circumvent pretty-printing if Clusto-Minify header is True.
 """
+    kwargs = {'sort_keys': True}
+    if headers.get('Clusto-Minify', 'False').lower() != 'true':
+        kwargs['indent'] = 4
+        kwargs['separators'] = (',', ': ')
+
     return bottle.HTTPResponse(
-        json.dumps(
-            obj, indent=4, sort_keys=True,
-            separators=(',', ': ')
-        ),
+        json.dumps(obj, **kwargs),
         code,
         content_type='application/json',
         **headers
