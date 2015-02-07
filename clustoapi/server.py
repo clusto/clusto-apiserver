@@ -364,7 +364,9 @@ Examples:
     drivers = bottle.request.params.getall('driver')
     children = bottle.request.params.get('children', default=True, type=bool)
     mode = bottle.request.headers.get('Clusto-Mode', default='compact')
-    minify = bottle.request.headers.get('Clusto-Minify', default='False')
+    headers = {
+        'Clusto-minify': bottle.request.headers.get('Clusto-Minify', default='False')
+    }
 
     try:
         # Assignments are moved into the try block because of the int casting.
@@ -375,7 +377,6 @@ Examples:
             pools, clusto_types=types, clusto_drivers=drivers, search_children=children
         )
         results = []
-        headers = {'Clusto-Minify': minify}
         if current:
             ents, total = util.page(list(ents), current=current, per=per)
             headers['Clusto-Pages'] = total
