@@ -455,9 +455,12 @@ Examples:
 
     driver = bottle.request.params.get('driver', default=None)
     mode = bottle.request.headers.get('Clusto-Mode', default='expanded')
+    headers = {
+        'Clusto-minify': bottle.request.headers.get('Clusto-Minify', default='False')
+    }
     obj, status, msg = util.get(name, driver)
     if not obj:
-        return util.dumps(msg, status)
+        return util.dumps(msg, status, headers=headers)
     try:
         return util.dumps(util.show(obj, mode))
     except TypeError as te:
@@ -555,6 +558,9 @@ Examples:
         return util.dumps('Provide at least one name to get data from', 412)
 
     mode = bottle.request.headers.get('Clusto-Mode', default='compact')
+    headers = {
+        'Clusto-minify': bottle.request.headers.get('Clusto-Minify', default='False')
+    }
     for name in names:
         obj, status, msg = util.get(name)
         try:
@@ -562,7 +568,7 @@ Examples:
         except TypeError as te:
             return util.dumps('%s' % (te,), 409)
 
-    return util.dumps(objs, 200 if all(objs) else 206 if any(objs) else 404)
+    return util.dumps(objs, 200 if all(objs) else 206 if any(objs) else 404, headers=headers)
 
 
 @root_app.get('/by-attr')
@@ -648,13 +654,16 @@ Examples:
         return util.dumps('Provide a key to use get_by_attr', 412)
 
     mode = bottle.request.headers.get('Clusto-Mode', default='compact')
+    headers = {
+        'Clusto-minify': bottle.request.headers.get('Clusto-Minify', default='False')
+    }
 
     try:
         ents = clusto.get_by_attr(**kwargs)
         results = []
         for ent in ents:
             results.append(util.show(ent, mode))
-        return util.dumps(results)
+        return util.dumps(results, headers=headers)
     except TypeError as te:
         return util.dumps('%s' % (te,), 409)
     except LookupError as le:
