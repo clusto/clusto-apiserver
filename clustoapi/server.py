@@ -50,6 +50,9 @@ multiple operations.
 :Clusto-Pages: Response only. This header returns the total number of pages
   to the requester.
 
+:Clusto-Minify: If set to ``True`` (not case sensitive), clusto will not
+  give a response that has been pretty-printed.
+
 
 API Docs
 --------
