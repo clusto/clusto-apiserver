@@ -7,6 +7,7 @@
 import os
 import pip.download
 import pip.req
+import pkg_resources
 import setuptools
 import sys
 
@@ -24,7 +25,12 @@ for arg in sys.argv[1:]:
 readme = os.path.join(os.path.dirname(sys.argv[0]), 'README.rst')
 reqs = os.path.join(os.path.dirname(sys.argv[0]), reqs)
 
-install_requires = pip.req.parse_requirements(reqs, session=pip.download.PipSession())
+# parse_requirements takes a required kwarg for pip >= 6.0.0
+if pkg_resources.get_distribution("pip").version >= '6.0.0':
+    install_requires = pip.req.parse_requirements(reqs, session=pip.download.PipSession())
+else:
+    install_requires = pip.req.parse_requirements(reqs)
+
 dependency_links = set([str(_.url) for _ in install_requires if _.url])
 install_requires = set([str(_.req) for _ in install_requires])
 
