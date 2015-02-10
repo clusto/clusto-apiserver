@@ -365,7 +365,7 @@ Examples:
     children = bottle.request.params.get('children', default=True, type=bool)
     mode = bottle.request.headers.get('Clusto-Mode', default='compact')
     headers = {
-        'Clusto-minify': bottle.request.headers.get('Clusto-Minify', default='False')
+        'Clusto-Minify': bottle.request.headers.get('Clusto-Minify', default='False')
     }
 
     try:
@@ -460,7 +460,7 @@ Examples:
     driver = bottle.request.params.get('driver', default=None)
     mode = bottle.request.headers.get('Clusto-Mode', default='expanded')
     headers = {
-        'Clusto-minify': bottle.request.headers.get('Clusto-Minify', default='False')
+        'Clusto-Minify': bottle.request.headers.get('Clusto-Minify', default='False')
     }
     obj, status, msg = util.get(name, driver)
     if not obj:
@@ -563,7 +563,7 @@ Examples:
 
     mode = bottle.request.headers.get('Clusto-Mode', default='compact')
     headers = {
-        'Clusto-minify': bottle.request.headers.get('Clusto-Minify', default='False')
+        'Clusto-Minify': bottle.request.headers.get('Clusto-Minify', default='False')
     }
     for name in names:
         obj, status, msg = util.get(name)
@@ -659,7 +659,7 @@ Examples:
 
     mode = bottle.request.headers.get('Clusto-Mode', default='compact')
     headers = {
-        'Clusto-minify': bottle.request.headers.get('Clusto-Minify', default='False')
+        'Clusto-Minify': bottle.request.headers.get('Clusto-Minify', default='False')
     }
 
     try:
