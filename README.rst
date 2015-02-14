@@ -6,7 +6,7 @@
    :target: http://clusto-apiserver.readthedocs.org
    :alt: Documentation in RTD
 
-.. image:: https://pypip.in/version/clusto-apiserver/badge.svg?text=version
+.. image:: https://pypip.in/version/clusto-apiserver/badge.svg?text=version&style=flat
    :target: https://pypi.python.org/pypi/clusto-apiserver/
    :alt: Latest Version
 
