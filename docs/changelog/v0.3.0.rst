@@ -1,6 +1,9 @@
 Version 0.3.0 (2015-02-13)
 --------------------------
 
+Feature release
+
+
 Features
 ^^^^^^^^
 
