@@ -1,0 +1,4 @@
+Version 0.3.1 (2015-02-13)
+--------------------------
+
+New release only to deal with dumb pypi upload error hurr.
