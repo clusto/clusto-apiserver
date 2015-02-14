@@ -1,0 +1,18 @@
+Version 0.3.0 (2015-02-13)
+--------------------------
+
+Features
+^^^^^^^^
+
+* The ``/by-attr`` endpoint, which translates to the main clusto query method
+  ``get_by_attr()``
+
+* Pagination implementation for results. By default it is turned off, basically
+  only useful for those cases where your data is still too much. One important
+  caveat here is that this only affects the **presentation** of the data back
+  to the client, not the **querying** of the data from the database. Pagination
+  is not native to clusto, yet
+
+* Minify implementation for results. All results by default are *pretty
+  printed* but if you pass a request header they will be printed as a single
+  string
