@@ -127,7 +127,7 @@ returned to the client.
 """
 
     first = (current - 1) * per
-    last = current * per - 1
+    last = current * per
     # 0:1 edge case with one entitiy.
     if not last:
         last = 1
