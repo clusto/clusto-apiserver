@@ -1,0 +1,10 @@
+Version 0.3.2 (2015-02-17)
+--------------------------
+
+New bugfix release
+
+
+Bugfixes
+^^^^^^^^
+
+* Fixed slicing in pagination logic
