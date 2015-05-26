@@ -49,7 +49,8 @@ Dumps a given object as a JSON string in an HTTP Response object.
 Will circumvent pretty-printing if Clusto-Minify header is True.
 """
     kwargs = {'sort_keys': True}
-    if headers.get('Clusto-Minify', 'False').lower() != 'true':
+    headers['Clusto-Minify'] = bottle.request.headers.get('Clusto-Minify', default='False')
+    if headers['Clusto-Minify'].lower() != 'true':
         kwargs['indent'] = 4
         kwargs['separators'] = (',', ': ')
 
@@ -81,10 +82,12 @@ JSON.
     return str(obj)
 
 
-def show(obj, mode='expanded'):
+def show(obj, mode=''):
     """
 Will return the expanded or compact representation of a given object
 """
+    if not mode:
+        mode = bottle.request.headers.get('Clusto-Mode', default='expanded')
 
     def compact():
         return u'/%s/%s' % (obj.driver, obj.name)
