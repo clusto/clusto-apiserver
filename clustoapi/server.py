@@ -252,6 +252,52 @@ the plain text version back
         return text
 
 
+@root_app.get('/driverlist')
+def get_driverlist():
+    """
+Returns clusto.driverlist, a list of drivers and their qualified class paths.
+
+Examples:
+
+.. code:: bash
+
+    $ ${get} ${server_url}/driverlist
+    {
+        "basicappliance": "clusto.drivers.devices.appliance.basicappliance.BasicAppliance",
+        "basiccage": "clusto.drivers.locations.datacenters.basiccage.BasicCage",
+        "basicconsoleserver": "clusto.drivers.devices.consoleservers.basicconsoleserver.BasicConsoleServer",
+        "basicdatacenter": "clusto.drivers.locations.datacenters.basicdatacenter.BasicDatacenter",
+        "basicnetworkswitch": "clusto.drivers.devices.networkswitches.basicnetworkswitch.BasicNetworkSwitch",
+        "basicpowerstrip": "clusto.drivers.devices.powerstrips.basicpowerstrip.BasicPowerStrip",
+        "basicrack": "clusto.drivers.locations.racks.basicrack.BasicRack",
+        "basicserver": "clusto.drivers.devices.servers.basicserver.BasicServer",
+        "basicvirtualserver": "clusto.drivers.devices.servers.basicserver.BasicVirtualServer",
+        "basiczone": "clusto.drivers.locations.zones.basiczone.BasicZone",
+        "clustometa": "clusto.drivers.base.clustometa.ClustoMeta",
+        "device": "clusto.drivers.base.device.Device",
+        "entity": "clusto.drivers.base.driver.Driver",
+        "exclusive_pool": "clusto.drivers.categories.pool.ExclusivePool",
+        "ipmanager": "clusto.drivers.resourcemanagers.ipmanager.IPManager",
+        "location": "clusto.drivers.base.location.Location",
+        "pool": "clusto.drivers.categories.pool.Pool",
+        "resourcemanager": "clusto.drivers.base.resourcemanager.ResourceManager",
+        "simpleentitynamemanager": "clusto.drivers.resourcemanagers.simplenamemanager.SimpleEntityNameManager",
+        "simplenamemanager": "clusto.drivers.resourcemanagers.simplenamemanager.SimpleNameManager",
+        "unique_pool": "clusto.drivers.categories.pool.UniquePool"
+    }
+    HTTP: 200
+    Content-type: application/json
+
+"""
+
+    driverlist = {}
+    for name, driver in clusto.driverlist.items():
+        # This looks silly, but it is the easiest way to get class paths in a string.
+        driverlist[name] = "{0}.{1}".format(driver.__module__, driver.__name__)
+
+    return util.dumps(driverlist, 200)
+
+
 @root_app.get('/from-pools')
 def get_from_pools():
     """
