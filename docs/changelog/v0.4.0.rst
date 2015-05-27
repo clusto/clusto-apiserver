@@ -1,0 +1,22 @@
+Version 0.4.0 (2015-05-27)
+--------------------------
+
+New feature release with some API changes (read at the bottom) which will
+hopefully stop being a thing once we hit 1.0
+
+
+Features
+^^^^^^^^
+
+* Adding a main /driverlist endpoint to match clusto.driverlist
+* Added support for extra server adapter options in config
+* Better test cases for resource manager core application
+* Support for pool removal with caveats, read below for changes
+
+API Changes
+^^^^^^^^^^^
+
+* Pool insertion changed from a PUT to a generic POST action, briefly: PUT
+  for ``.insert()`` didn't make much sense without support for ``.remove()``
+  but ``.remove()`` isn't properly a DELETE action. Ergo we changed it to
+  be a generic POST to the endpoint with an ``action=[insert,remove]`` field
