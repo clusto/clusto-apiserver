@@ -50,20 +50,39 @@ Examples:
 
 .. code:: bash
 
+    $ ${post} -d 'name=zmanager' ${server_url}/resourcemanager/simplenamemanager
+    {
+        "attrs": [
+            ...
+        ],
+        "contents": [],
+        "count": 0,
+        "driver": "simplenamemanager",
+        "name": "zmanager",
+        "parents": []
+    }
+    HTTP: 201
+    Content-type: application/json
+
+The above will create a simple name manager called "zmanager"
+
+.. code:: bash
+
     $ ${get} ${server_url}/resourcemanager/
     [
-        ...
+        "/simpleentitynamemanager/testnames",
+        "/simplenamemanager/zmanager"
     ]
     HTTP: 200
     Content-type: application/json
 
-The above will list all resource managers in clusto
+The above will list all resource managers in clusto, which should have "zmanager"
 
 .. code:: bash
 
     $ ${get} ${server_url}/resourcemanager/simpleentitynamemanager
     [
-        ...
+        "/simpleentitynamemanager/testnames"
     ]
     HTTP: 200
     Content-type: application/json
