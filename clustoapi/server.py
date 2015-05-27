@@ -812,7 +812,7 @@ Configure the root app
     return kwargs
 
 
-def main(workers='1',server='wsgiref'):
+def main():
     """
 Main entry point for the clusto-apiserver console program
 """
