@@ -31,7 +31,7 @@ if pkg_resources.get_distribution("pip").version >= '6.0.0':
 else:
     install_requires = pip.req.parse_requirements(reqs)
 
-dependency_links = set([str(_.url) for _ in install_requires if _.url])
+dependency_links = set([str(_.url) for _ in install_requires if 'url' in dir(_)])
 install_requires = set([str(_.req) for _ in install_requires])
 
 # These two were introduced in 2.7
