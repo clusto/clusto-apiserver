@@ -294,41 +294,54 @@ Will yield a 409 (Conflict) because the object ``showpool`` is not a
     return util.dumps(util.show(obj))
 
 
-@app.put('/<driver>/<name>')
-def insert(driver, name):
+@app.post('/<driver>/<name>')
+def action(driver, name):
     """
-Inserts the given device from the request parameters into the object
+Inserts/removes the given device from the request parameters into/from the object
 
 Example:
 
 .. code:: bash
 
-    $ ${post} -d 'name=insertpool' ${server_url}/entity/pool
+    $ ${post} -d 'name=pool1' ${server_url}/entity/pool
     [
-        "/pool/insertpool"
+        "/pool/pool1"
     ]
     HTTP: 201
     Content-type: application/json
 
 .. code:: bash
 
-    $ ${post} -d 'name=insertserver' ${server_url}/entity/basicserver
+    $ ${post} -d 'name=server1' ${server_url}/entity/basicserver
     [
-        "/basicserver/insertserver"
+        "/basicserver/server1"
     ]
     HTTP: 201
     Content-type: application/json
 
 .. code:: bash
 
-    $ ${put} -d 'device=insertserver' ${server_url}/entity/pool/insertpool
+    $ ${post} -d 'device=server1' -d 'action=insert' ${server_url}/entity/pool/pool1
     {
         "attrs": [],
         "contents": [
-            "/basicserver/insertserver"
+            "/basicserver/server1"
         ],
         "driver": "pool",
-        "name": "insertpool",
+        "name": "pool1",
+        "parents": []
+    }
+    HTTP: 200
+    Content-type: application/json
+
+.. code:: bash
+
+    $ ${post} -d 'device=server1' -d 'action=remove' ${server_url}/entity/pool/pool1
+    {
+        "attrs": [],
+        "contents": [],
+        "driver": "pool",
+        "name": "pool1",
         "parents": []
     }
     HTTP: 200
@@ -336,42 +349,56 @@ Example:
 
 Will:
 
-#.  Create a pool entity called ``insertpool``
-#.  Create a basicserver entity called ``insertserver``
-#.  Insert the entity ``insertserver`` into the entity ``insertpool``
+#.  Create a pool entity called ``pool1``
+#.  Create a basicserver entity called ``server1``
+#.  Insert the entity ``server1`` into the entity ``pool1``
+#.  Remove the entity ``server1`` from the entity ``pool1``
 
 Examples:
 
 .. code:: bash
 
-    $ ${post} -d 'name=insertpool2' ${server_url}/entity/pool
+    $ ${post} -d 'name=pool2' ${server_url}/entity/pool
     [
-        "/pool/insertpool2"
+        "/pool/pool2"
     ]
     HTTP: 201
     Content-type: application/json
 
 .. code:: bash
 
-    $ ${post} -d 'name=insertserver2' -d 'name=insertserver3' ${server_url}/entity/basicserver
+    $ ${post} -d 'name=server2' -d 'name=server3' ${server_url}/entity/basicserver
     [
-        "/basicserver/insertserver2",
-        "/basicserver/insertserver3"
+        "/basicserver/server2",
+        "/basicserver/server3"
     ]
     HTTP: 201
     Content-type: application/json
 
 .. code:: bash
 
-    $ ${put} -d 'device=insertserver2' -d 'device=insertserver3' ${server_url}/entity/pool/insertpool2
+    $ ${post} -d 'device=server2' -d 'device=server3' -d 'action=insert' ${server_url}/entity/pool/pool2
     {
         "attrs": [],
         "contents": [
-            "/basicserver/insertserver2",
-            "/basicserver/insertserver3"
+            "/basicserver/server2",
+            "/basicserver/server3"
         ],
         "driver": "pool",
-        "name": "insertpool2",
+        "name": "pool2",
+        "parents": []
+    }
+    HTTP: 200
+    Content-type: application/json
+
+.. code:: bash
+
+    $ ${post} -d 'device=server2' -d 'device=server3' -d 'action=remove' ${server_url}/entity/pool/pool2
+    {
+        "attrs": [],
+        "contents": [],
+        "driver": "pool",
+        "name": "pool2",
         "parents": []
     }
     HTTP: 200
@@ -379,9 +406,10 @@ Examples:
 
 The above will:
 
-#.  Create a pool entity called ``insertpool2``
-#.  Create twp basicserver entities called ``insertserver2`` and ``insertserver3``
+#.  Create a pool entity called ``pool2``
+#.  Create two basicserver entities called ``server2`` and ``server3``
 #.  Insert both basicserver entities into the pool entity
+#.  Remove both basicserver entities from the pool entity
 
 """
 
@@ -389,6 +417,10 @@ The above will:
     if not obj:
         return util.dumps(msg, status)
     devices = request.params.getall('device')
+    action = request.params.get('action')
+
+    if not action:
+        bottle.abort(400, 'Parameter \'action\' is required.')
 
     devobjs = []
     notfound = []
@@ -399,10 +431,19 @@ The above will:
             notfound.append(device)
 
     if notfound:
-        bottle.abort(404, 'Objects %s do not exist and cannot be inserted into "%s"' % (','.join(notfound), name,))
+        bottle.abort(404, 'Objects %s do not exist and cannot be used with "%s"' % (','.join(notfound), name,))
 
-    for devobj in devobjs:
-        if devobj not in obj:
-            obj.insert(devobj)
+    if action == 'insert':
+        for devobj in devobjs:
+            if devobj not in obj:
+                obj.insert(devobj)
+
+    elif action == 'remove':
+        for devobj in devobjs:
+            if devobj in obj:
+                obj.remove(devobj)
+
+    else:
+        bottle.abort(400, '%s is not a valid action.' % (action))
 
     return show(driver, name)
