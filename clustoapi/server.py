@@ -771,6 +771,12 @@ Configure the root app
             cfg, 'apiserver.server', default='wsgiref'
         ),
     )
+    kwargs['workers'] = config.get(
+        'workers',
+        script_helper.get_conf(
+            cfg, 'apiserver.workers', default=1
+        ),
+    )
     kwargs['debug'] = config.get(
         'debug',
         script_helper.get_conf(
