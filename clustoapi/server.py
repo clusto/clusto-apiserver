@@ -771,6 +771,12 @@ Configure the root app
             cfg, 'apiserver.server', default='wsgiref'
         ),
     )
+    kwargs['server_kwargs'] = config.get(
+        'server_kwargs',
+        script_helper.get_conf(
+            cfg, 'apiserver.server_kwargs', default={}, datatype=dict
+        ),
+    )
     kwargs['debug'] = config.get(
         'debug',
         script_helper.get_conf(
@@ -811,6 +817,7 @@ def main():
 Main entry point for the clusto-apiserver console program
 """
     kwargs = _configure()
+    kwargs.update(kwargs.pop('server_kwargs'))
     root_app.run(**kwargs)
 
 
