@@ -69,6 +69,15 @@ The following example should fail because there is no driver ``nondriver``:
 
     result = []
     kwargs = {}
+    mode = bottle.request.headers.get('Clusto-Mode', default='compact')
+    headers = {}
+    try:
+        # Assignments are moved into the try block because of the int casting.
+        current = int(bottle.request.headers.get('Clusto-Page', default='0'))
+        per = int(bottle.request.headers.get('Clusto-Per-Page', default='50'))
+    except TypeError as ve:
+        return util.dumps('%s' % (ve,), 400)
+
     for param in request.params.keys():
         kwargs[param] = request.params.getall(param)
     if driver:
@@ -77,20 +86,15 @@ The following example should fail because there is no driver ``nondriver``:
         else:
             return util.dumps('The requested driver "%s" does not exist' % (driver,), 412)
     ents = clusto.get_entities(**kwargs)
-    for ent in ents:
-        result.append(util.unclusto(ent))
+    if current:
+        ents, total = util.page(ents, current=current, per=per)
+        headers['Clusto-Pages'] = total
+        headers['Clusto-Per-Page'] = per
+        headers['Clusto-Page'] = current
 
-    result = []
-    kwargs = {}
-    for param in request.params.keys():
-        kwargs[param] = request.params.getall(param)
-    if driver:
-        if driver in clusto.driverlist:
-            kwargs['clusto_drivers'] = [clusto.driverlist[driver]]
-    ents = clusto.get_entities(**kwargs)
     for ent in ents:
-        result.append(util.unclusto(ent))
-    return util.dumps(result)
+        result.append(util.show(ent, mode))
+    return util.dumps(result, headers=headers)
 
 
 @app.post('/<driver>')
