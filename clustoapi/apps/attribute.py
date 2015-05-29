@@ -11,6 +11,7 @@
 The ``attribute`` application handles all attribute specific operations like
 querying, adding, deleting and updating attributes.
 """
+import json
 
 import bottle
 from bottle import request
@@ -176,6 +177,26 @@ value ``joe`` to the previously created entity ``addattrserver``
     obj, status, msg = util.get(name, driver)
     if not obj:
         return util.dumps(msg, status)
+
+    try:
+        json_kwargs = request.json
+    except ValueError as ve:
+        return util.dumps('%s' % (ve,), 400)
+
+    if json_kwargs:
+        # Pull the serialized json tuple off of the params so that we can merge it back in gracefully.
+        for key in kwargs.keys():
+            try:
+                if json.loads(key) == json_kwargs:
+                    kwargs.pop(key)
+            except ValueError as ve:
+                pass
+
+        # Checks for values in both kwargs dicts that do not match.
+        if [value for key, value in json_kwargs.items() if value != kwargs.get(key, value)]:
+            return util.dumps('Cannot supply differentiating values for \'%s\'.' % (key,), 400)
+        else:
+            kwargs = {k: v for d in [kwargs, json_kwargs] for k, v in d.items()}
 
     for k in ('key', 'value'):
         if k not in kwargs.keys():
