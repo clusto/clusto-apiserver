@@ -11,7 +11,6 @@
 The ``attribute`` application handles all attribute specific operations like
 querying, adding, deleting and updating attributes.
 """
-import json
 
 import bottle
 from bottle import request
@@ -191,14 +190,19 @@ value ``joe`` to the previously created entity ``addattrserver``
     # Adds support for bulk attr posting.
     attrs = [kwargs] if isinstance(kwargs, dict) else kwargs
 
+    # Check for malformed data or missing pieces before adding any attrs.
     for attr in attrs:
         for k in ('key', 'value'):
             if k not in attr.keys():
                 bottle.abort(412, 'Provide at least "key" and "value"')
 
         if 'number' in attr:
-            attr['number'] = int(attr['number'])
+            try:
+                attr['number'] = int(attr['number'])
+            except ValueError as ve:
+                return util.dumps('%s' % (ve,), 400)
 
+    for attr in attrs:
         obj.add_attr(**attr)
 
     return util.dumps([util.unclusto(_) for _ in obj.attrs()], 201)
