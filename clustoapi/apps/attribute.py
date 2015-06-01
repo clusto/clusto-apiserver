@@ -184,28 +184,22 @@ value ``joe`` to the previously created entity ``addattrserver``
         return util.dumps('%s' % (ve,), 400)
 
     if json_kwargs:
-        # Pull the serialized json tuple off of the params so that we can merge it back in gracefully.
-        for key in kwargs.keys():
-            try:
-                if json.loads(key) == json_kwargs:
-                    kwargs.pop(key)
-            except ValueError as ve:
-                pass
+        if request.query:
+            return util.dumps('Error: json and query params may not be passed in the same request.', 400)
+        kwargs = json_kwargs
 
-        # Checks for values in both kwargs dicts that do not match.
-        if [value for key, value in json_kwargs.items() if value != kwargs.get(key, value)]:
-            return util.dumps('Cannot supply differentiating values for \'%s\'.' % (key,), 400)
-        else:
-            kwargs = {k: v for d in [kwargs, json_kwargs] for k, v in d.items()}
+    # Adds support for bulk attr posting.
+    attrs = [kwargs] if isinstance(kwargs, dict) else kwargs
 
-    for k in ('key', 'value'):
-        if k not in kwargs.keys():
-            bottle.abort(412, 'Provide at least "key" and "value"')
+    for attr in attrs:
+        for k in ('key', 'value'):
+            if k not in attr.keys():
+                bottle.abort(412, 'Provide at least "key" and "value"')
 
-    if 'number' in kwargs:
-        kwargs['number'] = int(kwargs['number'])
+        if 'number' in attr:
+            attr['number'] = int(attr['number'])
 
-    obj.add_attr(**kwargs)
+        obj.add_attr(**attr)
 
     return util.dumps([util.unclusto(_) for _ in obj.attrs()], 201)
 
