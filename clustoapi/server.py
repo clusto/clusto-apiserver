@@ -349,6 +349,7 @@ Examples:
             ],
             "contents": [],
             "driver": "basicserver",
+            "ips": [],
             "name": "testserver1",
             "parents": [
                 "/pool/singlepool",
@@ -367,6 +368,7 @@ Examples:
             ],
             "contents": [],
             "driver": "basicserver",
+            "ips": [],
             "name": "testserver2",
             "parents": [
                 "/pool/multipool"
@@ -480,6 +482,7 @@ Examples:
         ],
         "contents": [],
         "driver": "basicserver",
+        "ips": [],
         "name": "testserver1",
         "parents": [
             "/pool/singlepool",
@@ -559,6 +562,7 @@ Examples:
             ],
             "contents": [],
             "driver": "basicserver",
+            "ips": [],
             "name": "testserver1",
             "parents": [
                 "/pool/singlepool",
@@ -577,6 +581,7 @@ Examples:
             ],
             "contents": [],
             "driver": "basicserver",
+            "ips": [],
             "name": "testserver2",
             "parents": [
             "/pool/multipool"
@@ -656,6 +661,7 @@ Examples:
             ],
             "contents": [],
             "driver": "basicserver",
+            "ips": [],
             "name": "testserver1",
             "parents": [
                 "/pool/singlepool",
@@ -674,6 +680,7 @@ Examples:
             ],
             "contents": [],
             "driver": "basicserver",
+            "ips": [],
             "name": "testserver2",
             "parents": [
                 "/pool/multipool"
