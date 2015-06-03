@@ -166,6 +166,29 @@ Example:
     HTTP: 201
     Content-type: application/json
 
+.. code:: bash
+
+    $ ${post} -H 'Content-Type: application/json' -d '${attr_dict}' ${server_url}/attribute/addattrserver
+    [
+        ...
+        {
+            "datatype": "string",
+            "key": "group",
+            "number": null,
+            "subkey": "admin",
+            "value": "apache"
+        },
+        {
+            "datatype": "string",
+            "key": "group",
+            "number": null,
+            "subkey": "member",
+            "value": "webapp"
+        }
+    ]
+    HTTP: 201
+    Content-type: application/json
+
 Will add the attribute with key ``group`` *and* subkey ``owner`` *and*
 value ``joe`` to the previously created entity ``addattrserver``
 
