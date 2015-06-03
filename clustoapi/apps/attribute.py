@@ -108,8 +108,11 @@ def add_attr(name):
     """
 Add an attribute to this object.
 
- *  Requires HTTP parameters ``name``, ``key``, and ``value``
+ *  Requires parameters ``name``, ``key``, and ``value``
  *  Optional parameters are ``subkey`` and ``number``
+ *  These parameters can be either be passed with a querystring
+ *  or a json body. If json is supplied, multiple attributes may be
+ *  added at the same time.
 
 Example:
 
@@ -166,6 +169,9 @@ Example:
     HTTP: 201
     Content-type: application/json
 
+Will add the attribute with key ``group`` *and* subkey ``owner`` *and*
+value ``joe`` to the previously created entity ``addattrserver``
+
 .. code:: bash
 
     $ ${post} -H 'Content-Type: application/json' -d '${attr_dict}' ${server_url}/attribute/addattrserver
@@ -189,8 +195,8 @@ Example:
     HTTP: 201
     Content-type: application/json
 
-Will add the attribute with key ``group`` *and* subkey ``owner`` *and*
-value ``joe`` to the previously created entity ``addattrserver``
+Will add two attributes in bulk by stating
+that the content type is ``application/json``.
 
 """
 
