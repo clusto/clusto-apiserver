@@ -108,8 +108,11 @@ def add_attr(name):
     """
 Add an attribute to this object.
 
- *  Requires HTTP parameters ``name``, ``key``, and ``value``
+ *  Requires parameters ``name``, ``key``, and ``value``
  *  Optional parameters are ``subkey`` and ``number``
+ *  These parameters can be either be passed with a querystring
+ *  or a json body. If json is supplied, multiple attributes may be
+ *  added at the same time.
 
 Example:
 
@@ -169,6 +172,32 @@ Example:
 Will add the attribute with key ``group`` *and* subkey ``owner`` *and*
 value ``joe`` to the previously created entity ``addattrserver``
 
+.. code:: bash
+
+    $ ${post} -H 'Content-Type: application/json' -d '${sample_json_attrs}' ${server_url}/attribute/addattrserver
+    [
+        ...
+        {
+            "datatype": "string",
+            "key": "group",
+            "number": null,
+            "subkey": "admin",
+            "value": "apache"
+        },
+        {
+            "datatype": "string",
+            "key": "group",
+            "number": null,
+            "subkey": "member",
+            "value": "webapp"
+        }
+    ]
+    HTTP: 201
+    Content-type: application/json
+
+Will add two attributes in bulk by stating
+that the content type is ``application/json``.
+
 """
 
     kwargs = dict(request.params.items())
@@ -177,14 +206,33 @@ value ``joe`` to the previously created entity ``addattrserver``
     if not obj:
         return util.dumps(msg, status)
 
-    for k in ('key', 'value'):
-        if k not in kwargs.keys():
-            bottle.abort(412, 'Provide at least "key" and "value"')
+    try:
+        json_kwargs = request.json
+    except ValueError as ve:
+        return util.dumps('%s' % (ve,), 400)
 
-    if 'number' in kwargs:
-        kwargs['number'] = int(kwargs['number'])
+    if json_kwargs:
+        if request.query:
+            return util.dumps('Error: json and query params may not be passed in the same request.', 400)
+        kwargs = json_kwargs
 
-    obj.add_attr(**kwargs)
+    # Adds support for bulk attr posting.
+    attrs = [kwargs] if isinstance(kwargs, dict) else kwargs
+
+    # Check for malformed data or missing pieces before adding any attrs.
+    for attr in attrs:
+        for k in ('key', 'value'):
+            if k not in attr.keys():
+                bottle.abort(412, 'Provide at least "key" and "value"')
+
+        if 'number' in attr:
+            try:
+                attr['number'] = int(attr['number'])
+            except ValueError as ve:
+                return util.dumps('%s' % (ve,), 400)
+
+    for attr in attrs:
+        obj.add_attr(**attr)
 
     return util.dumps([util.unclusto(_) for _ in obj.attrs()], 201)
 
