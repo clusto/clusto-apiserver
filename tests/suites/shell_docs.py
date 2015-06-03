@@ -63,6 +63,13 @@ class TemplatedShellDocTestParser(shelldoctest.ShellDocTestParser):
         tpl = string.Template(svalue)
         text = tpl.safe_substitute(**self.substitutions)
         output = shelldoctest.ShellDocTestParser.parse(self, text, name)
+        # Replace double quoted json with escapes so it gets through to curl correctly.
+        # \\\\\\" will turn into \\\" for python which will turn into " for curl. yay.
+        for i, line in enumerate(output):
+            if isinstance(line, shelldoctest.ShellExample):
+                cmd = line.source.replace('"','\\\\\\\"')
+                output[i].source = cmd.replace('(\\\\\\"','("').replace('\\\\\\")','")')
+
         return output
 
 
