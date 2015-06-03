@@ -174,7 +174,7 @@ value ``joe`` to the previously created entity ``addattrserver``
 
 .. code:: bash
 
-    $ ${post} -H 'Content-Type: application/json' -d '${attr_dict}' ${server_url}/attribute/addattrserver
+    $ ${post} -H 'Content-Type: application/json' -d '${sample_json_attrs}' ${server_url}/attribute/addattrserver
     [
         ...
         {

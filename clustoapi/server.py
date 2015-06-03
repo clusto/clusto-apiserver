@@ -82,7 +82,7 @@ DOC_SUBSTITUTIONS = {
     'delete': "curl -X DELETE -s -w '\\nHTTP: %{http_code}\\nContent-type: %{content_type}'",
     'delete_i': "curl -X DELETE -si",
     'head': "curl -s -I",
-    'attr_dict': '[{"key":"group","subkey":"admin","value":"apache"},{"key":"group","subkey":"member","value":"webapp"}]'
+    'sample_json_attrs': '[{"key":"group","subkey":"admin","value":"apache"},{"key":"group","subkey":"member","value":"webapp"}]'
 }
 
 root_app = bottle.Bottle(autojson=False)
