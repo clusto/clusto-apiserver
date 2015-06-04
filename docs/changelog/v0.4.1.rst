@@ -1,0 +1,13 @@
+Version 0.4.1 (2015-06-04)
+--------------------------
+
+New feature release
+
+
+Features
+^^^^^^^^
+
+* Add get_ips list to the show method (James Cunningham)
+* Add ability to post json bodies in attribute app (James Cunningham)
+* Added expansion and paging to the entity app (James Cunningham)
+
