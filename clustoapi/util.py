@@ -67,7 +67,7 @@ def unclusto(obj):
 Convert an object to a representation that can be safely serialized into
 JSON.
 """
-    if type(obj) in (str, unicode, int) or obj is None:
+    if type(obj) in (str, unicode, int, list, dict) or obj is None:
         return obj
     if isinstance(obj, clusto.Attribute):
         return {
