@@ -1,0 +1,12 @@
+Version 0.4.2 (2015-06-18)
+--------------------------
+
+New bugfix release
+
+
+Bug fixes
+^^^^^^^^^
+
+* lists and dicts attribute values were returned as a unicode string
+  representation which was unparseable as a regular json object.
+
