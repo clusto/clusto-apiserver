@@ -797,6 +797,12 @@ Configure the root app
             cfg, 'apiserver.apps', default={}, datatype=dict
         )
     )
+    kwargs['response_headers'] = config.get(
+        'response_headers',
+        script_helper.get_conf(
+            cfg, 'apiserver.response_headers', default={}, datatype=dict
+        )
+    )
 
     root_app.route('/__doc__', 'GET', functools.partial(build_docs, '/', __name__))
     for mount_point, cls in mount_apps.items():
@@ -814,6 +820,13 @@ Main entry point for the clusto-apiserver console program
 """
     kwargs = _configure()
     kwargs.update(kwargs.pop('server_kwargs'))
+    headers = kwargs.pop('response_headers', {})
+
+    @root_app.hook('before_request')
+    def enable_response_headers():
+        for header, value in headers.items():
+            bottle.response.headers[header] = value
+
     root_app.run(**kwargs)
 
 
