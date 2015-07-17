@@ -109,7 +109,8 @@ def add_attr(name):
 Add an attribute to this object.
 
  *  Requires parameters ``name``, ``key``, and ``value``
- *  Optional parameters are ``subkey`` and ``number``
+ *  Optional parameters are ``subkey`,` ``number``, and ``datatype``
+ *  Additionally, ``strpformat`` can be provided for a datetime attribute.
  *  These parameters can be either be passed with a querystring
  *  or a json body. If json is supplied, multiple attributes may be
  *  added at the same time.
@@ -230,6 +231,12 @@ that the content type is ``application/json``.
                 attr['number'] = int(attr['number'])
             except ValueError as ve:
                 return util.dumps('%s' % (ve,), 400)
+
+        if 'datatype' in attr:
+            datatype = attr.pop('datatype')
+            if 'strpformat' in attr:
+                strpformat = attr.pop('strpformat', '%Y-%m-%d %H:%M:%S.%f')
+            attr['value'] = util.typecast(attr['value'], datatype, strpformat=strpformat)
 
     for attr in attrs:
         obj.add_attr(**attr)
