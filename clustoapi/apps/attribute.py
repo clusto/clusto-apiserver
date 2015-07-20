@@ -110,7 +110,7 @@ Add an attribute to this object.
 
  *  Requires parameters ``name``, ``key``, and ``value``
  *  Optional parameters are ``subkey`,` ``number``, and ``datatype``
- *  Additionally, ``strpformat`` can be provided for a datetime attribute.
+ *  Additionally, ``mask`` can be provided for a datetime attribute.
  *  These parameters can be either be passed with a querystring
  *  or a json body. If json is supplied, multiple attributes may be
  *  added at the same time.
@@ -234,9 +234,9 @@ that the content type is ``application/json``.
 
         if 'datatype' in attr:
             datatype = attr.pop('datatype')
-            if 'strpformat' in attr:
-                strpformat = attr.pop('strpformat', '%Y-%m-%d %H:%M:%S.%f')
-            attr['value'] = util.typecast(attr['value'], datatype, strpformat=strpformat)
+            if 'mask' in attr:
+                mask = attr.pop('mask', '%Y-%m-%dT%H:%M:%S.%f')
+            attr['value'] = util.typecast(attr['value'], datatype, mask=mask)
 
     for attr in attrs:
         obj.add_attr(**attr)

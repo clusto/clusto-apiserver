@@ -80,6 +80,8 @@ JSON.
         }
     if issubclass(obj.__class__, clusto.Driver):
         return '/%s/%s' % (obj.driver, obj.name)
+    if isinstance(obj, datetime.datetime):
+        return obj.isoformat()
     return str(obj)
 
 
@@ -143,12 +145,12 @@ returned to the client.
     total = total + 1 if len(ents) % per else 0
     return ents[first:last], total
 
-def typecast(value, datatype, strpformat='%Y-%m-%d %H:%M:%S.%f'):
+def typecast(value, datatype, mask='%Y-%m-%dT%H:%M:%S.%f'):
     """
 Takes a string and a valid clusto datatype and attempts to cast the value
 to the specified datatype. Will error out if a ValueError is incurred
-or a relation does not exist. Will aslo take a strptime format because
-typcasting datetimes is hard.
+or a relation does not exist. Will aslo take a strptime format  as ``mask``
+because typcasting datetimes is hard.
 """
 
     types = 'int', 'string', 'datetime', 'relation', 'json'
@@ -161,7 +163,7 @@ typcasting datetimes is hard.
         if datatype == 'string':
             return value
         if datatype == 'datetime':
-            return datetime.datetime.strptime(value, strpformat)
+            return datetime.datetime.strptime(value, mask)
         if datatype == 'relation':
             _, driver, name = value.split('/')
             obj, status, msg = get(name, driver=driver)
