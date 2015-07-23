@@ -211,7 +211,7 @@ the plain text version back
 In the test config, CORS is configured to be returned with every response header.
 
 .. code::bash
-    $ ${get} -I ${server_url}
+    $ ${head} ${server_url}
     ...
     Access-Control-Allow-Origin: *
     ...
