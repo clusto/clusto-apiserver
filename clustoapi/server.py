@@ -208,6 +208,15 @@ the plain text version back
     $ diff -q <( curl -s -H 'Accept: text/plain' ${server_url}/__doc__ ) <( curl -s -H 'Accept: text/plain' ${server_url}/ ) && echo 'equal' || echo 'diff'
     equal
 
+In the test config, CORS is configured to be returned with every response header.
+
+.. code::bash
+    $ ${get} -I ${server_url}
+    ...
+    Access-Control-Allow-Origin: *
+    ...
+
+
 """
 
 #   Get the request path so we can look at the module index
