@@ -216,6 +216,17 @@ In the test config, CORS is configured to be returned with every response header
     Access-Control-Allow-Origin: *
     ...
 
+Or:
+
+.. code::bash
+    $ ( ${head} ${server_url} | grep -q "^Access-Control-Allow-Origin:" ) && echo "Header Found" || echo "Not Here"
+    Header Found
+
+If you try to get a different header, it should not be there
+
+.. code::bash
+    $ ( ${head} ${server_url} | grep ^Spurious-Header ) && echo "Header Found" || echo "Not Here"
+    Not Here
 
 """
 
