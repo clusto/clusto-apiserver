@@ -59,7 +59,7 @@ class TestingServer(threading.Thread):
                 'host': '127.0.0.1',
                 'apps': get_mount_apps(),
                 'server': self.server,
-                'response_headers': {'Access-Control-Allow-Origin':'*'},
+                'response_headers': {'Access-Control-Allow-Origin': '*'},
             },
             configfile=conffile,
             init_data={
