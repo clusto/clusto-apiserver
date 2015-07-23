@@ -53,6 +53,14 @@ multiple operations.
 :Clusto-Minify: If set to ``True`` (not case sensitive), clusto will not
   give a response that has been pretty-printed.
 
+Configurable Response Headers
+-----------------------------
+The Clusto API Server comes with the ability to define and configure static
+response headers within the ``clusto.conf``.
+
+:Example: To enable CORS, a line in the ``clusto.conf`` would read:
+  ``response_headers = Access-Control-Allow-Origin:*``
+
 
 API Docs
 --------
