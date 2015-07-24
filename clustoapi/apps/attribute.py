@@ -254,7 +254,8 @@ it will be added, if the attribute already exists then it will be
 updated.
 
  *  Requires HTTP parameters ``key`` and ``value``
- *  Optional parameters are ``subkey`` and ``number``
+ *  Optional parameters are ``subkey`,` ``number``, and ``datatype``
+ *  Additionally, ``mask`` can be provided for a datetime attribute.
 
 Example:
 
