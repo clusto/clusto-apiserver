@@ -21,6 +21,67 @@ app = bottle.Bottle()
 app.config['source_module'] = __name__
 
 
+def _write_attrs(method, name, **kwargs):
+    """
+Helper method for reduced code between POST and PUT.
+Returns a response for the methods calling it.
+"""
+    if method == 'set':
+        code = 200
+    if method == 'add':
+        code = 201
+    else:
+        util.dumps('"%s" is neither set nor add. How did you get here?' % method, 400)
+
+    request_kwargs = dict(request.params.items())
+    driver = kwargs.get('driver', None)
+    obj, status, msg = util.get(name, driver)
+    if not obj:
+        return util.dumps(msg, status)
+
+    try:
+        # Merge URL values and kwarg values, but do not allow conflicts.
+        for k, v in request_kwargs.items():
+            if kwargs.get(k) is not None and kwargs[k] != v:
+                raise ValueError('Two different values were submitted for "%s": %s' % (k, [kwargs[k], v]))
+            kwargs[k] = v
+
+        # Additionally capture a value error if the json is bad.
+        json_kwargs = request.json
+    except ValueError as ve:
+        return util.dumps('%s' % (ve,), 400)
+
+    if json_kwargs:
+        if request.query:
+            return util.dumps('Error: json and query params may not be passed in the same request.', 400)
+        kwargs = json_kwargs
+
+    # Adds support for bulk attr posting.
+    attrs = [kwargs] if isinstance(kwargs, dict) else kwargs
+    # Check for malformed data or missing pieces before adding any attrs.
+    for attr in attrs:
+        for k in ('key', 'value'):
+            if k not in attr.keys():
+                bottle.abort(412, 'Provide at least "key" and "value"')
+
+        if 'number' in attr:
+            try:
+                attr['number'] = int(attr['number'])
+            except ValueError as ve:
+                return util.dumps('%s' % (ve,), 400)
+
+        if 'datatype' in attr:
+            datatype = attr.pop('datatype')
+            if 'mask' in attr:
+                mask = attr.pop('mask', '%Y-%m-%dT%H:%M:%S.%f')
+            attr['value'] = util.typecast(attr['value'], datatype, mask=mask)
+
+    for attr in attrs:
+        getattr(obj, method + '_attr')(**attr)
+
+    return util.dumps([util.unclusto(_) for _ in obj.attrs()], code)
+
+
 @app.get('/<name>')
 @app.get('/<name>/')
 @app.get('/<name>/<key>')
@@ -104,7 +165,9 @@ Will show the attributes for ``server1`` if their key is ``owner``.
 
 
 @app.post('/<name>')
-def add_attr(name):
+@app.post('/<name>/<key>/<subkey>')
+@app.post('/<name>/<key>/<subkey>/<number:int>')
+def add_attr(name, **kwargs):
     """
 Add an attribute to this object.
 
@@ -201,53 +264,13 @@ that the content type is ``application/json``.
 
 """
 
-    kwargs = dict(request.params.items())
-    driver = kwargs.get('driver', None)
-    obj, status, msg = util.get(name, driver)
-    if not obj:
-        return util.dumps(msg, status)
-
-    try:
-        json_kwargs = request.json
-    except ValueError as ve:
-        return util.dumps('%s' % (ve,), 400)
-
-    if json_kwargs:
-        if request.query:
-            return util.dumps('Error: json and query params may not be passed in the same request.', 400)
-        kwargs = json_kwargs
-
-    # Adds support for bulk attr posting.
-    attrs = [kwargs] if isinstance(kwargs, dict) else kwargs
-
-    # Check for malformed data or missing pieces before adding any attrs.
-    for attr in attrs:
-        for k in ('key', 'value'):
-            if k not in attr.keys():
-                bottle.abort(412, 'Provide at least "key" and "value"')
-
-        if 'number' in attr:
-            try:
-                attr['number'] = int(attr['number'])
-            except ValueError as ve:
-                return util.dumps('%s' % (ve,), 400)
-
-        if 'datatype' in attr:
-            datatype = attr.pop('datatype')
-            if 'mask' in attr:
-                mask = attr.pop('mask', '%Y-%m-%dT%H:%M:%S.%f')
-            attr['value'] = util.typecast(attr['value'], datatype, mask=mask)
-
-    for attr in attrs:
-        obj.add_attr(**attr)
-
-    return util.dumps([util.unclusto(_) for _ in obj.attrs()], 201)
+    return _write_attrs('add', name, **kwargs)
 
 
 @app.put('/<name>/<key>')
 @app.put('/<name>/<key>/<subkey>')
 @app.put('/<name>/<key>/<subkey>/<number:int>')
-def set_attr(name, key, subkey=None, number=None):
+def set_attr(name, **kwargs):
     """
 Sets an attribute from this object. If the attribute doesn't exist
 it will be added, if the attribute already exists then it will be
@@ -354,14 +377,7 @@ Will:
 #.  Update the attribute we set above, now the ``value`` will read ``bob``
 """
 
-    kwargs = dict(request.params.items())
-    obj, status, msg = util.get(name)
-    if not obj:
-        return util.dumps(msg, status)
-    if 'value' not in kwargs.keys():
-        bottle.abort(412, 'Provide at least "key" and "value"')
-    obj.set_attr(key=key, subkey=subkey, number=number, value=kwargs['value'])
-    return util.dumps([util.unclusto(_) for _ in obj.attrs()])
+    return _write_attrs('set', name, **kwargs)
 
 
 @app.delete('/<name>/<key>')

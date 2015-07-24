@@ -49,6 +49,12 @@ def dumps(obj, code=200, headers={}):
 Dumps a given object as a JSON string in an HTTP Response object.
 Will circumvent pretty-printing if Clusto-Minify header is True.
 """
+    # Merge global response headers into the response, but do not
+    # let them override the current header values.
+    for header, value in bottle.response.headers.items():
+        if headers.get(header) is None:
+            headers[header] = value
+
     kwargs = {'sort_keys': True}
     headers['Clusto-Minify'] = bottle.request.headers.get('Clusto-Minify', default='False')
     if headers['Clusto-Minify'].lower() != 'true':
