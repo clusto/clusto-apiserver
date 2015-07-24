@@ -70,6 +70,11 @@ Returns a response for the methods calling it.
             except ValueError as ve:
                 return util.dumps('%s' % (ve,), 400)
 
+        if 'datatype' in attr:
+            datatype = attr.pop('datatype')
+            mask = attr.pop('mask', '%Y-%m-%dT%H:%M:%S.%f')
+            attr['value'] = util.typecast(attr['value'], datatype, mask=mask)
+
     for attr in attrs:
         getattr(obj, method + '_attr')(**attr)
 
@@ -166,7 +171,8 @@ def add_attr(name, **kwargs):
 Add an attribute to this object.
 
  *  Requires parameters ``name``, ``key``, and ``value``
- *  Optional parameters are ``subkey`` and ``number``
+ *  Optional parameters are ``subkey`,` ``number``, and ``datatype``
+ *  Additionally, ``mask`` can be provided for a datetime attribute.
  *  These parameters can be either be passed with a querystring
  *  or a json body. If json is supplied, multiple attributes may be
  *  added at the same time.
@@ -231,6 +237,63 @@ value ``joe`` to the previously created entity ``addattrserver``
 
 .. code:: bash
 
+    $ ${post} -d 'key=group' -d 'subkey=id' -d 'value=6' -d 'datatype=int' ${server_url}/attribute/addattrserver
+    [
+    ...
+        {
+            "datatype": "int",
+            "key": "group",
+            "number": null,
+            "subkey": "id",
+            "value": 6
+        }
+    ]
+    HTTP: 201
+    Content-type: application/json
+
+Will add the attribute with key ``group`` *and* subkey ``id`` *and*
+value ``1`` with the correct datatype to the previously created entity ``addattrserver``
+
+.. code:: bash
+
+    $ ${post} -d 'key=inception' -d 'value=/basicserver/addattrserver' -d 'datatype=relation' ${server_url}/attribute/addattrserver
+    [
+    ...
+        {
+            "datatype": "relation",
+            "key": "inception",
+            "number": null,
+            "subkey": null,
+            "value": "/basicserver/addattrserver"
+        }
+    ]
+    HTTP: 201
+    Content-type: application/json
+
+Will add the attribute with key ``inception`` *and* itself as a relation
+using the ``relation`` datatype.
+
+.. code:: bash
+
+    $ ${post} -d 'key=birthday' -d 'subkey=jtcunning' -d 'value=1991-07-09T14:46:51.321435' -d 'datatype=datetime' ${server_url}/attribute/addattrserver
+    [
+        {
+            "datatype": "datetime",
+            "key": "birthday",
+            "number": null,
+            "subkey": "jtcunning",
+            "value": "1991-07-09T14:46:51.321435"
+        },
+    ...
+    ]
+    HTTP: 201
+    Content-type: application/json
+
+Will add the attribute with key ``birthday`` *and* subkey ``jtcunning``
+with the ``datetime`` python object as the datatype.
+
+.. code:: bash
+
     $ ${post} -H 'Content-Type: application/json' -d '${sample_json_attrs}' ${server_url}/attribute/addattrserver
     [
         ...
@@ -247,7 +310,8 @@ value ``joe`` to the previously created entity ``addattrserver``
             "number": null,
             "subkey": "member",
             "value": "webapp"
-        }
+        },
+        ...
     ]
     HTTP: 201
     Content-type: application/json
@@ -270,7 +334,8 @@ it will be added, if the attribute already exists then it will be
 updated.
 
  *  Requires HTTP parameters ``key`` and ``value``
- *  Optional parameters are ``subkey`` and ``number``
+ *  Optional parameters are ``subkey`,` ``number``, and ``datatype``
+ *  Additionally, ``mask`` can be provided for a datetime attribute.
 
 Example:
 
