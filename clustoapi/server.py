@@ -53,6 +53,14 @@ multiple operations.
 :Clusto-Minify: If set to ``True`` (not case sensitive), clusto will not
   give a response that has been pretty-printed.
 
+Configurable Response Headers
+-----------------------------
+The Clusto API Server comes with the ability to define and configure static
+response headers within the ``clusto.conf``.
+
+:Example: To enable CORS, a line in the ``clusto.conf`` would read:
+  ``response_headers = Access-Control-Allow-Origin:*``
+
 
 API Docs
 --------
@@ -199,6 +207,26 @@ the plain text version back
 
     $ diff -q <( curl -s -H 'Accept: text/plain' ${server_url}/__doc__ ) <( curl -s -H 'Accept: text/plain' ${server_url}/ ) && echo 'equal' || echo 'diff'
     equal
+
+In the test config, CORS is configured to be returned with every response header.
+
+.. code::bash
+    $ ${head} ${server_url}
+    ...
+    Access-Control-Allow-Origin: *
+    ...
+
+Or:
+
+.. code::bash
+    $ ( ${head} ${server_url} | grep -q "^Access-Control-Allow-Origin:" ) && echo "Header Found" || echo "Not Here"
+    Header Found
+
+If you try to get a non-configured header, it shouldn't be in the output
+
+.. code::bash
+    $ ( ${head} ${server_url} | grep "^Spurious-Header:" ) && echo "Header Found" || echo "Not Here"
+    Not Here
 
 """
 
@@ -797,6 +825,12 @@ Configure the root app
             cfg, 'apiserver.apps', default={}, datatype=dict
         )
     )
+    response_headers = config.get(
+        'response_headers',
+        script_helper.get_conf(
+            cfg, 'apiserver.response_headers', default={}, datatype=dict
+        )
+    )
 
     root_app.route('/__doc__', 'GET', functools.partial(build_docs, '/', __name__))
     for mount_point, cls in mount_apps.items():
@@ -804,6 +838,11 @@ Configure the root app
         path = '/__doc__%s' % (mount_point,)
         root_app.route(path, 'GET', functools.partial(build_docs, path, cls))
         root_app.mount(mount_point, module.app)
+
+    @root_app.hook('before_request')
+    def enable_response_headers():
+        for header, value in response_headers.items():
+            bottle.response.headers[header] = value
 
     return kwargs
 
