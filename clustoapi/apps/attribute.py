@@ -72,8 +72,7 @@ Returns a response for the methods calling it.
 
         if 'datatype' in attr:
             datatype = attr.pop('datatype')
-            if 'mask' in attr:
-                mask = attr.pop('mask', '%Y-%m-%dT%H:%M:%S.%f')
+            mask = attr.pop('mask', '%Y-%m-%dT%H:%M:%S.%f')
             attr['value'] = util.typecast(attr['value'], datatype, mask=mask)
 
     for attr in attrs:
