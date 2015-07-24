@@ -26,12 +26,12 @@ def _write_attrs(method, name, **kwargs):
 Helper method for reduced code between POST and PUT.
 Returns a response for the methods calling it.
 """
-    if method == 'set_attr':
+    if method == 'set':
         code = 200
-    if method == 'add_attr':
+    if method == 'add':
         code = 201
     else:
-        util.dumps('"%s" is neither set_attr nor add_attr. How did you get here?' % method, 400)
+        util.dumps('"%s" is neither set nor add. How did you get here?' % method, 400)
 
     request_kwargs = dict(request.params.items())
     driver = kwargs.get('driver', None)
@@ -71,7 +71,7 @@ Returns a response for the methods calling it.
                 return util.dumps('%s' % (ve,), 400)
 
     for attr in attrs:
-        getattr(obj, method)(**attr)
+        getattr(obj, method + '_attr')(**attr)
 
     return util.dumps([util.unclusto(_) for _ in obj.attrs()], code)
 
@@ -257,7 +257,7 @@ that the content type is ``application/json``.
 
 """
 
-    return _write_attrs('add_attr', name, **kwargs)
+    return _write_attrs('add', name, **kwargs)
 
 
 @app.put('/<name>/<key>')
@@ -369,7 +369,7 @@ Will:
 #.  Update the attribute we set above, now the ``value`` will read ``bob``
 """
 
-    return _write_attrs('set_attr', name, **kwargs)
+    return _write_attrs('set', name, **kwargs)
 
 
 @app.delete('/<name>/<key>')
