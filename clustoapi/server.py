@@ -222,10 +222,10 @@ Or:
     $ ( ${head} ${server_url} | grep -q "^Access-Control-Allow-Origin:" ) && echo "Header Found" || echo "Not Here"
     Header Found
 
-If you try to get a different header, it should not be there
+If you try to get a non-configured header, it shouldn't be in the output
 
 .. code::bash
-    $ ( ${head} ${server_url} | grep ^Spurious-Header ) && echo "Header Found" || echo "Not Here"
+    $ ( ${head} ${server_url} | grep "^Spurious-Header:" ) && echo "Header Found" || echo "Not Here"
     Not Here
 
 """
