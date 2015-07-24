@@ -1,0 +1,13 @@
+Version 0.5.0 (2015-07-24)
+--------------------------
+
+New feature release
+
+
+Features
+^^^^^^^^
+
+* add and set attr marriage, bring a present (James Cunningham)
+* add typecast util (James Cunningham)
+* add ability to set global response headers in clusto.conf (James Cunningham)
+
