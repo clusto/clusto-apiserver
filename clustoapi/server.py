@@ -124,6 +124,29 @@ Send an HTTP code to clients so they stop asking for favicon. Example:
     return bottle.HTTPResponse('', status=410)
 
 
+@root_app.route('/', method='OPTIONS')
+@root_app.route('/<url:re:.+>', method='OPTIONS')
+def options(**kwargs):
+    """
+Return some headers and call it a day, no matter what path is requested.
+
+.. code:: bash
+
+    $ ${head} -X OPTIONS ${server_url}/
+    HTTP/1.0 204 No Content
+    ...
+    Content-Length: 0
+
+    $ ${head} -X OPTIONS ${server_url}/return/headers/no/matter/where
+    HTTP/1.0 204 No Content
+    ...
+    Content-Length: 0
+
+"""
+
+    return bottle.HTTPResponse('', status=204)
+
+
 @root_app.route('/', method='HEAD')
 @root_app.get('/__version__')
 def version():
