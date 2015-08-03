@@ -124,11 +124,18 @@ Send an HTTP code to clients so they stop asking for favicon. Example:
     return bottle.HTTPResponse('', status=410)
 
 
-@root_app.route('/', method='OPTIONS')
-@root_app.route('/<url:re:.+>', method='OPTIONS')
 def options(**kwargs):
     """
-Return some headers and call it a day, no matter what path is requested.
+    Defined from w3.org:
+    "The OPTIONS method represents a request for information about the communication
+    options available on the request/response chain identified by the Request-URI.
+    This method allows the client to determine the options and/or requirements
+    associated with a resource, or the capabilities of a server, without implying
+    a resource action or initiating a resource retrieval."
+
+    The clusto-apiserver team plans to roll this out to individual resources once
+    it has been used a proper amount, but for now we will return OPTIONS with
+    the minimum amount of required headers no matter what resource is requested.
 
 .. code:: bash
 
@@ -855,6 +862,13 @@ Configure the root app
         )
     )
 
+    enable_options_method = config.get(
+        'enable_options_method',
+        script_helper.get_conf(
+            cfg, 'apiserver.enable_options_method', default=False, datatype=bool
+        )
+    )
+
     root_app.route('/__doc__', 'GET', functools.partial(build_docs, '/', __name__))
     for mount_point, cls in mount_apps.items():
         module = importlib.import_module(cls)
@@ -866,6 +880,12 @@ Configure the root app
     def enable_response_headers():
         for header, value in response_headers.items():
             bottle.response.headers[header] = value
+
+    if enable_options_method:
+        @root_app.route('/', method='OPTIONS')
+        @root_app.route('/<url:re:.+>', method='OPTIONS')
+        def enable_options(**kwargs):
+            return options(**kwargs)
 
     return kwargs
 
