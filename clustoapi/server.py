@@ -124,6 +124,39 @@ Send an HTTP code to clients so they stop asking for favicon. Example:
     return bottle.HTTPResponse('', status=410)
 
 
+@root_app.route('/', method='OPTIONS')
+@root_app.route('/<url:re:.+>', method='OPTIONS')
+def options_root(**kwargs):
+    """
+    Defined from w3.org:
+    "The OPTIONS method represents a request for information about the communication
+    options available on the request/response chain identified by the Request-URI.
+    This method allows the client to determine the options and/or requirements
+    associated with a resource, or the capabilities of a server, without implying
+    a resource action or initiating a resource retrieval."
+
+    The clusto-apiserver team plans to roll this out to individual resources once
+    it has been used a proper amount, but for now we will return OPTIONS with
+    the minimum amount of required headers (and an empty content) no matter what
+    resource is requested.
+
+.. code:: bash
+
+    $ ${head} -X OPTIONS ${server_url}/
+    HTTP/1.0 204 No Content
+    ...
+    Content-Length: 0
+
+    $ ${head} -X OPTIONS ${server_url}/return/headers/no/matter/where
+    HTTP/1.0 204 No Content
+    ...
+    Content-Length: 0
+
+"""
+
+    return bottle.HTTPResponse('', status=204)
+
+
 @root_app.route('/', method='HEAD')
 @root_app.get('/__version__')
 def version():
