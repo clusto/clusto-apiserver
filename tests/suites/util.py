@@ -60,7 +60,6 @@ class TestingServer(threading.Thread):
                 'apps': get_mount_apps(),
                 'server': self.server,
                 'response_headers': {'Access-Control-Allow-Origin': '*'},
-                'enable_options_method': True,
             },
             configfile=conffile,
             init_data={
