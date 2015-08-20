@@ -42,6 +42,16 @@ Core applications
    clustoapi/apps/*
 
 
+Development documentation
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   dev/*
+
+
 Indices and tables
 ==================
 
