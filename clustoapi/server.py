@@ -33,6 +33,7 @@ The Clusto API Server should thus have the following required features:
 
 Custom Headers
 --------------
+
 The Clusto API Server comes with the ability to pass certain headers to
 multiple operations.
 
@@ -53,8 +54,10 @@ multiple operations.
 :Clusto-Minify: If set to ``True`` (not case sensitive), clusto will not
   give a response that has been pretty-printed.
 
+
 Configurable Response Headers
 -----------------------------
+
 The Clusto API Server comes with the ability to define and configure static
 response headers within the ``clusto.conf``.
 
@@ -126,19 +129,20 @@ Send an HTTP code to clients so they stop asking for favicon. Example:
 
 @root_app.route('/', method='OPTIONS')
 @root_app.route('/<url:re:.+>', method='OPTIONS')
-def options_root(**kwargs):
+def options(**kwargs):
     """
-    Defined from w3.org:
+Defined from w3.org:
+
     "The OPTIONS method represents a request for information about the communication
     options available on the request/response chain identified by the Request-URI.
     This method allows the client to determine the options and/or requirements
     associated with a resource, or the capabilities of a server, without implying
     a resource action or initiating a resource retrieval."
 
-    The clusto-apiserver team plans to roll this out to individual resources once
-    it has been used a proper amount, but for now we will return OPTIONS with
-    the minimum amount of required headers (and an empty content) no matter what
-    resource is requested.
+The clusto-apiserver team plans to roll this out to individual resources once
+it has been used a proper amount, but for now we will return OPTIONS with
+the minimum amount of required headers (and an empty content) no matter what
+resource is requested.
 
 .. code:: bash
 
@@ -148,6 +152,21 @@ def options_root(**kwargs):
     Content-Length: 0
 
     $ ${head} -X OPTIONS ${server_url}/return/headers/no/matter/where
+    HTTP/1.0 204 No Content
+    ...
+    Content-Length: 0
+
+
+The same applies to any mounted application:
+
+.. code:: bash
+
+    $ ${head} -X OPTIONS ${server_url}/entity/
+    HTTP/1.0 204 No Content
+    ...
+    Content-Length: 0
+
+    $ ${head} -X OPTIONS ${server_url}/attribute/who/knows/where
     HTTP/1.0 204 No Content
     ...
     Content-Length: 0
@@ -213,7 +232,7 @@ This call just returns a mapping of all currently installed applications.
 
 @root_app.get('/')
 @root_app.get('/__doc__')
-def build_docs(path='/', module=__name__):
+def build_docs(module=__name__):
     """
 This will build documentation for the given module and all its methods.
 If python-rest is available, it will attempt to parse it as a restructured
@@ -271,13 +290,13 @@ If you try to get a non-configured header, it shouldn't be in the output
         '=' * len(mod.__name__),
         mod.__doc__ or '')]
 
-    if path == '/':
+    if module == __name__:
         mods = _get_mounts_and_modules()
         if mods:
             docs.append('\nMounted Applications\n%s\n' % ('-' * 20, ))
             for k, v in mods.items():
                 docs.append(
-                    '\n * `%s <${server_url}/__doc__%s>`_\n' % (v, k,)
+                    '\n * `%s <${server_url}%s/__doc__>`_\n' % (v, k,)
                 )
 
     docs.append('\nModule methods\n%s\n' % ('-' * 32,))
@@ -865,12 +884,18 @@ Configure the root app
         )
     )
 
-    root_app.route('/__doc__', 'GET', functools.partial(build_docs, '/', __name__))
+    root_app.route('/__doc__', 'GET', functools.partial(build_docs))
     for mount_point, cls in mount_apps.items():
         module = importlib.import_module(cls)
-        path = '/__doc__%s' % (mount_point,)
-        root_app.route(path, 'GET', functools.partial(build_docs, path, cls))
         root_app.mount(mount_point, module.app)
+
+        # Documentation endpoints
+        module.app.route('/__doc__', 'GET', functools.partial(build_docs, cls))
+        module.app.route('/__doc__/', 'GET', functools.partial(build_docs, cls))
+
+        # OPTIONS dummy routers
+        module.app.route('/', 'OPTIONS', functools.partial(options))
+        module.app.route('/<url:re:.+>', 'OPTIONS', functools.partial(options))
 
     @root_app.hook('before_request')
     def enable_response_headers():
