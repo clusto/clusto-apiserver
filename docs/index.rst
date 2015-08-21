@@ -13,14 +13,15 @@ Changelog
 ---------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :glob:
 
    changelog/v**
 
 
-Table of contents
------------------
+User documentation
+------------------
+
 
 Main server components
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -42,8 +43,8 @@ Core applications
    clustoapi/apps/*
 
 
-Development documentation
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Developer documentation
+-----------------------
 
 .. toctree::
    :maxdepth: 1
