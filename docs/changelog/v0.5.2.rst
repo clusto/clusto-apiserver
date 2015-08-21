@@ -1,0 +1,16 @@
+Version 0.5.2 (2015-08-21)
+--------------------------
+
+New feature/bugfix release
+
+
+Features
+^^^^^^^^
+
+* Adding developer documentation (Jorge Gallegos)
+
+
+Bugfixes
+^^^^^^^^
+
+* Fixed the OPTIONS dummy routers (Jorge Gallegos)
