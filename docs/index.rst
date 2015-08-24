@@ -9,16 +9,6 @@ About
 .. include:: changelog/current.rst
 
 
-Changelog
----------
-
-.. toctree::
-   :maxdepth: 1
-   :glob:
-
-   changelog/v**
-
-
 User documentation
 ------------------
 
@@ -51,6 +41,16 @@ Developer documentation
    :glob:
 
    dev/*
+
+
+Full Changelog History
+----------------------
+
+.. toctree::
+   :maxdepth: 1
+   :glob:
+
+   changelog/v**
 
 
 Indices and tables
