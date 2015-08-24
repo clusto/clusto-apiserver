@@ -21,8 +21,8 @@ THREADS = {}
 
 def setUp(dt):
 
-    THREADS[dt] = util.TestingServer(PORT)
-    THREADS[dt].start()
+    THREADS[str(dt)] = util.TestingServer(PORT)
+    THREADS[str(dt)].start()
     count = 0
     while not util.ping(PORT) and count < 50:
         count += 1
@@ -30,7 +30,7 @@ def setUp(dt):
 
 def tearDown(dt):
 
-    THREADS[dt].shutdown()
+    THREADS[str(dt)].shutdown()
     count = 0
     while util.ping(PORT) and count < 50:
         count += 1
