@@ -148,7 +148,10 @@ returned to the client.
         last = 1
 
     total = len(ents) / per
-    total = total + 1 if len(ents) % per else 0
+    # Add another page to the total if there is a remainder.
+    if len(ents) % per:
+        total += 1
+
     return ents[first:last], total
 
 def typecast(value, datatype, mask='%Y-%m-%dT%H:%M:%S.%f'):
