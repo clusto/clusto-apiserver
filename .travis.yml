@@ -3,3 +3,10 @@ python:
   - 2.7
 install: pip install -r test-requirements.txt
 script:  python setup.py test
+notifications:
+  email: false
+  irc:
+    channels:
+      - "chat.freenode.net#clusto"
+    on_success: change
+    on_failure: always
