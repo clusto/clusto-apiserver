@@ -379,6 +379,45 @@ Examples:
     return util.dumps(driverlist, 200)
 
 
+@root_app.get('/typelist')
+def get_driverlist():
+    """
+Returns clusto.typelist, a list of the most recent drivers to register with that type.
+
+Examples:
+
+.. code:: bash
+
+    $ ${get} ${server_url}/typelist
+    {
+        "appliance": "clusto.drivers.devices.appliance.basicappliance.BasicAppliance",
+        "cage": "clusto.drivers.locations.datacenters.basiccage.BasicCage",
+        "clustometa": "clusto.drivers.base.clustometa.ClustoMeta",
+        "consoleserver": "clusto.drivers.devices.consoleservers.basicconsoleserver.BasicConsoleServer",
+        "datacenter": "clusto.drivers.locations.datacenters.basicdatacenter.BasicDatacenter",
+        "generic": "clusto.drivers.base.device.Device",
+        "location": "clusto.drivers.base.location.Location",
+        "networkswitch": "clusto.drivers.devices.networkswitches.basicnetworkswitch.BasicNetworkSwitch",
+        "pool": "clusto.drivers.categories.pool.UniquePool",
+        "powerstrip": "clusto.drivers.devices.powerstrips.basicpowerstrip.BasicPowerStrip",
+        "rack": "clusto.drivers.locations.racks.basicrack.BasicRack",
+        "resourcemanager": "clusto.drivers.resourcemanagers.ipmanager.IPManager",
+        "server": "clusto.drivers.devices.servers.basicserver.BasicVirtualServer",
+        "zone": "clusto.drivers.locations.zones.basiczone.BasicZone"
+    }
+    HTTP: 200
+    Content-type: application/json
+
+"""
+
+    typelist = {}
+    for name, driver in clusto.typelist.items():
+        # This looks silly, but it is the easiest way to get class paths in a string.
+        typelist[name] = "{0}.{1}".format(driver.__module__, driver.__name__)
+
+    return util.dumps(typelist, 200)
+
+
 @root_app.get('/from-pools')
 def get_from_pools():
     """
@@ -435,7 +474,8 @@ Examples:
             "parents": [
                 "/pool/singlepool",
                 "/pool/multipool"
-            ]
+            ],
+            "type": "server"
         },
         {
             "attrs": [
@@ -453,7 +493,8 @@ Examples:
             "name": "testserver2",
             "parents": [
                 "/pool/multipool"
-            ]
+            ],
+            "type": "server"
         }
     ]
     HTTP: 200
@@ -568,7 +609,8 @@ Examples:
         "parents": [
             "/pool/singlepool",
             "/pool/multipool"
-        ]
+        ],
+        "type": "server"
     }
     HTTP: 200
     Content-type: application/json
@@ -648,7 +690,8 @@ Examples:
             "parents": [
                 "/pool/singlepool",
                 "/pool/multipool"
-            ]
+            ],
+            "type": "server"
         },
         {
             "attrs": [
@@ -666,7 +709,8 @@ Examples:
             "name": "testserver2",
             "parents": [
             "/pool/multipool"
-            ]
+            ],
+            "type": "server"
         }
     ]
     HTTP: 200
@@ -747,7 +791,8 @@ Examples:
             "parents": [
                 "/pool/singlepool",
                 "/pool/multipool"
-            ]
+            ],
+            "type": "server"
         },
         {
             "attrs": [
@@ -765,7 +810,8 @@ Examples:
             "name": "testserver2",
             "parents": [
                 "/pool/multipool"
-            ]
+            ],
+            "type": "server"
         }
     ]
     HTTP: 200

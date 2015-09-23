@@ -273,7 +273,8 @@ Example:
         "contents": [],
         "driver": "pool",
         "name": "showpool",
-        "parents": []
+        "parents": [],
+        "type": "pool"
     }
     HTTP: 200
     Content-type: application/json
@@ -333,7 +334,8 @@ Example:
         ],
         "driver": "pool",
         "name": "pool1",
-        "parents": []
+        "parents": [],
+        "type": "pool"
     }
     HTTP: 200
     Content-type: application/json
@@ -346,7 +348,8 @@ Example:
         "contents": [],
         "driver": "pool",
         "name": "pool1",
-        "parents": []
+        "parents": [],
+        "type": "pool"
     }
     HTTP: 200
     Content-type: application/json
@@ -390,7 +393,8 @@ Examples:
         ],
         "driver": "pool",
         "name": "pool2",
-        "parents": []
+        "parents": [],
+        "type": "pool"
     }
     HTTP: 200
     Content-type: application/json
@@ -403,7 +407,8 @@ Examples:
         "contents": [],
         "driver": "pool",
         "name": "pool2",
-        "parents": []
+        "parents": [],
+        "type": "pool"
     }
     HTTP: 200
     Content-type: application/json
