@@ -59,7 +59,8 @@ Examples:
         "count": 0,
         "driver": "simplenamemanager",
         "name": "zmanager",
-        "parents": []
+        "parents": [],
+        "type": "resourcemanager"
     }
     HTTP: 201
     Content-type: application/json
@@ -141,7 +142,8 @@ Examples:
         "count": 0,
         "driver": "simplenamemanager",
         "name": "nameman1",
-        "parents": []
+        "parents": [],
+        "type": "resourcemanager"
     }
     HTTP: 201
     Content-type: application/json
@@ -180,7 +182,8 @@ all default values set.
         "count": 0,
         "driver": "ipmanager",
         "name": "ipman1",
-        "parents": []
+        "parents": [],
+        "type": "ipmanager"
     }
     HTTP: 201
     Content-type: application/json
@@ -237,7 +240,8 @@ Examples:
         "count": 0,
         "driver": "simplenamemanager",
         "name": "nameman2",
-        "parents": []
+        "parents": [],
+        "type": "resourcemanager"
     }
     HTTP: 201
     Content-type: application/json
@@ -251,7 +255,8 @@ Examples:
         "count": 0,
         "driver": "simplenamemanager",
         "name": "nameman1",
-        "parents": []
+        "parents": [],
+        "type": "resourcemanager"
     }
     HTTP: 200
     Content-type: application/json
@@ -316,7 +321,8 @@ Examples:
         "count": 0,
         "driver": "simpleentitynamemanager",
         "name": "allocator",
-        "parents": []
+        "parents": [],
+        "type": "resourcemanager"
     }
     HTTP: 201
     Content-type: application/json
@@ -404,7 +410,8 @@ Examples:
         "count": 0,
         "driver": "ipmanager",
         "name": "ipman2",
-        "parents": []
+        "parents": [],
+        "type": "ipmanager"
     }
     HTTP: 201
     Content-type: application/json
@@ -418,7 +425,8 @@ Examples:
         "count": 0,
         "driver": "simpleentitynamemanager",
         "name": "names2",
-        "parents": []
+        "parents": [],
+        "type": "resourcemanager"
     }
     HTTP: 201
     Content-type: application/json

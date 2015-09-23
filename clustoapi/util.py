@@ -105,6 +105,7 @@ Will return the expanded or compact representation of a given object
         result = {}
         result['name'] = obj.name
         result['driver'] = obj.driver
+        result['type'] = obj.type
 
         attrs = []
         for x in obj.attrs():

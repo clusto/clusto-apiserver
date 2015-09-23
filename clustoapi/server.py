@@ -474,7 +474,8 @@ Examples:
             "parents": [
                 "/pool/singlepool",
                 "/pool/multipool"
-            ]
+            ],
+            "type": "server"
         },
         {
             "attrs": [
@@ -492,7 +493,8 @@ Examples:
             "name": "testserver2",
             "parents": [
                 "/pool/multipool"
-            ]
+            ],
+            "type": "server"
         }
     ]
     HTTP: 200
@@ -607,7 +609,8 @@ Examples:
         "parents": [
             "/pool/singlepool",
             "/pool/multipool"
-        ]
+        ],
+        "type": "server"
     }
     HTTP: 200
     Content-type: application/json
@@ -687,7 +690,8 @@ Examples:
             "parents": [
                 "/pool/singlepool",
                 "/pool/multipool"
-            ]
+            ],
+            "type": "server"
         },
         {
             "attrs": [
@@ -705,7 +709,8 @@ Examples:
             "name": "testserver2",
             "parents": [
             "/pool/multipool"
-            ]
+            ],
+            "type": "server"
         }
     ]
     HTTP: 200
@@ -786,7 +791,8 @@ Examples:
             "parents": [
                 "/pool/singlepool",
                 "/pool/multipool"
-            ]
+            ],
+            "type": "server"
         },
         {
             "attrs": [
@@ -804,7 +810,8 @@ Examples:
             "name": "testserver2",
             "parents": [
                 "/pool/multipool"
-            ]
+            ],
+            "type": "server"
         }
     ]
     HTTP: 200
