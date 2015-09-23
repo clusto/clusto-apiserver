@@ -183,7 +183,7 @@ all default values set.
         "driver": "ipmanager",
         "name": "ipman1",
         "parents": [],
-        "type": "ipmanager"
+        "type": "resourcemanager"
     }
     HTTP: 201
     Content-type: application/json
@@ -411,7 +411,7 @@ Examples:
         "driver": "ipmanager",
         "name": "ipman2",
         "parents": [],
-        "type": "ipmanager"
+        "type": "resourcemanager"
     }
     HTTP: 201
     Content-type: application/json
