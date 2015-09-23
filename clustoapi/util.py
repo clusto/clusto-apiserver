@@ -115,7 +115,7 @@ Will return the expanded or compact representation of a given object
         if isinstance(obj, clusto.drivers.resourcemanagers.ResourceManager):
             result['count'] = obj.count
 
-        if 'get_ips' in dir(obj) and not obj.entity.type == 'ipmanager':
+        if 'get_ips' in dir(obj) and 'manager' not in obj.entity.type:
                 result['ips'] = obj.get_ips()
 
         return result
