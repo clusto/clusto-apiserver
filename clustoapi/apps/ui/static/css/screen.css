@@ -7,6 +7,10 @@
     border-radius: 4px;
     margin-bottom: 10px;
 }
+.dropdown:hover .dropdown-menu {
+    display: block;
+    margin-top: 0;
+}
 
 div.obj a { font-weight: bold; color: #333; display: block; }
 div#Environments div.obj a { font-size: 1.3em; font-weight: bold; margin-right: 2px; }
