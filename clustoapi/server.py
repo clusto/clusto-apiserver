@@ -380,7 +380,7 @@ Examples:
 
 
 @root_app.get('/typelist')
-def get_driverlist():
+def get_typelist():
     """
 Returns clusto.typelist, a list of the most recent drivers to register with that type.
 
