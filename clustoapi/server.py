@@ -844,6 +844,74 @@ Examples:
         return util.dumps('%s' % (e,), 500)
 
 
+@root_app.get('/by-ip/<ip>')
+def get_by_ip(ip):
+    """
+One of the main ``clusto`` operations. Parameters:
+
+* Required path parameter: ``ip`` - The IP address you're looking for
+
+Examples:
+
+.. code:: bash
+
+    $ ${get} -H "Clusto-Mode: compact" -s ${server_url}/by-ip/10.128.14.41
+    [
+    "/dellr610_4/s0155"
+    ]
+
+    $ ${get} ${server_url}/by-ip/1.1.1.1
+    "No object with IP address \"1.1.1.1\" found"
+    HTTP: 404
+    Content-type: application/json
+
+"""
+
+    ents = clusto.get_by_ip(ip)
+    if not ents:
+        msg = u'No object with IP address "%s" found' % ip
+        return util.dumps(msg, 404)
+
+    results = []
+    for ent in ents:
+        results.append(util.show(ent))
+    return util.dumps(results)
+
+
+@root_app.get('/by-mac/<mac>')
+def get_by_mac(mac):
+    """
+One of the main ``clusto`` operations. Parameters:
+
+* Required path parameter: ``mac`` - The MAC address you're looking for
+
+Examples:
+
+.. code:: bash
+
+    $ ${get} -H "Clusto-Mode: compact" -s ${server_url}/by-mac/D4:BE:D9:A8:39:60
+    [
+    "/dellr610_4/s0155"
+    ]
+
+    $ ${get} ${server_url}/by-ip/00:00:00:00:00:00
+    "No object with MAC address \"00:00:00:00:00:00\" found"
+    HTTP: 404
+    Content-type: application/json
+
+"""
+
+    ents = clusto.get_by_mac(mac)
+    if not ents:
+        msg = u'No object(s) with MAC address "%s" found' % mac
+        return util.dumps(msg, 404)
+
+    results = []
+    for ent in ents:
+        results.append(util.show(ent))
+    return util.dumps(results)
+
+
 def _configure(config={}, configfile=None, init_data={}):
     """
 Configure the root app
